@@ -470,6 +470,28 @@ img {
   color: #fff;
 }
 
+.site-footer-credit {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,0.58);
+  font-size: 12px;
+  text-decoration: none;
+  transition: color .2s, opacity .2s;
+}
+
+.site-footer-credit:hover {
+  color: #fff;
+}
+
+.site-footer-credit-logo {
+  display: block;
+  width: auto;
+  height: 22px;
+  max-width: 112px;
+  object-fit: contain;
+}
+
 .wa-float {
   position: fixed;
   right: 28px;
