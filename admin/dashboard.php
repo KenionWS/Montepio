@@ -139,7 +139,7 @@ layout_sidebar('dashboard.php');
         <tr>
           <td>
             <?php if ($thumb): ?>
-              <img src="/montepio/<?= h($thumb) ?>" class="td-thumb" alt="">
+              <img src="/Montepio/<?= h($thumb) ?>" class="td-thumb" alt="">
             <?php else: ?>
               <div class="td-thumb-placeholder">[]</div>
             <?php endif; ?>

@@ -89,7 +89,7 @@ if (extension_loaded('gd')) {
         imagejpeg($thumb, $thumbPath, 85);
         imagedestroy($thumb);
         imagedestroy($src);
-        $thumbUrl = '/montepio/uploads/temp/' . $token . '/thumb.jpg';
+        $thumbUrl = '/Montepio/uploads/temp/' . $token . '/thumb.jpg';
     }
 }
 

@@ -8,4 +8,4 @@
     RewriteRule ^ index.php [L]
 </IfModule>
 
-FallbackResource /montepio/catalogo/index.php
+FallbackResource /Montepio/catalogo/index.php

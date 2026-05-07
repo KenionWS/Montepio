@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Configuración inicial — Montepio Admin</title>
-<link rel="icon" type="image/x-icon" href="/montepio/favicon.ico">
+<link rel="icon" type="image/x-icon" href="/Montepio/favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -62,7 +62,7 @@ input:focus{border-color:#004d33;}
 <body>
 <div class="box">
   <div class="logo">
-    <img src="/montepio/assets/brand/montepio-logo.jpg" alt="Montepio Antiguedades" class="logo-image"><div class="logo-text"><div class="sub">Configuracion inicial</div></div>
+    <img src="/Montepio/assets/brand/montepio-logo.jpg" alt="Montepio Antiguedades" class="logo-image"><div class="logo-text"><div class="sub">Configuracion inicial</div></div>
   </div>
 
   <?php if ($done): ?>

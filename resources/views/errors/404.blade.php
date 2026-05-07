@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pagina no encontrada | Montepio Antiguedades</title>
-  <link rel="icon" type="image/x-icon" href="/montepio/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="/Montepio/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/montepio/assets/site/shared.css">
-  <link rel="stylesheet" href="/montepio/assets/site/error.css">
+  <link rel="stylesheet" href="/Montepio/assets/site/shared.css">
+  <link rel="stylesheet" href="/Montepio/assets/site/error.css">
 </head>
 <body class="error-page">
   <div class="topbar">
@@ -26,7 +26,7 @@
   <header class="site-header">
     <div class="header-inner">
       <a href="{{ url('/') }}" class="site-logo">
-        <img src="/montepio/assets/brand/montepio-logo.jpg" alt="Montepio Antiguedades" class="site-logo-image">
+        <img src="/Montepio/assets/brand/montepio-logo.jpg" alt="Montepio Antiguedades" class="site-logo-image">
       </a>
     </div>
   </header>

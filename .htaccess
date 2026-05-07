@@ -2,10 +2,10 @@
     DirectoryIndex index.php index.html
 
     RewriteEngine On
-    RewriteBase /montepio/
+    RewriteBase /Montepio/
 
-    RewriteRule ^catalogo/(.*)$ /montepio/index.php/catalogo/$1 [L,QSA]
-    RewriteRule ^catalogo$ /montepio/index.php/catalogo [L,QSA]
+    RewriteRule ^catalogo/(.*)$ /Montepio/index.php/catalogo/$1 [L,QSA]
+    RewriteRule ^catalogo$ /Montepio/index.php/catalogo [L,QSA]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.php [L]

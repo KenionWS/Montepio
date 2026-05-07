@@ -219,7 +219,7 @@ layout_sidebar($isEdit ? '' : 'producto.php');
             <div class="img-previews" id="existingImgs">
               <?php foreach ($images as $img): ?>
                 <div class="img-preview-item" id="img-<?= (int)$img['id'] ?>">
-                  <img src="/montepio/<?= h($img['path_thumb']) ?>" alt="">
+                  <img src="/Montepio/<?= h($img['path_thumb']) ?>" alt="">
                   <?php if ($img['is_cover']): ?>
                     <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,77,51,.7);color:white;font-size:9px;text-align:center;padding:2px;">portada</div>
                   <?php endif; ?>
@@ -322,7 +322,7 @@ layout_sidebar($isEdit ? '' : 'producto.php');
         <?= $isEdit ? 'Guardar cambios' : 'Crear producto' ?>
       </button>
       <?php if ($isEdit): ?>
-        <a href="/montepio/producto/<?= h($p['slug']) ?>" target="_blank" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:8px;">
+        <a href="/Montepio/producto/<?= h($p['slug']) ?>" target="_blank" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:8px;">
           Ver en el sitio ->
         </a>
       <?php endif; ?>

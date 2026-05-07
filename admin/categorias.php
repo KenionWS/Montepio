@@ -298,7 +298,7 @@ layout_sidebar('categorias.php');
             <span class="form-hint">Se usa como fondo en la cabecera de categoria y en la home. Si no cargás una, quedan las iniciales.</span>
             <?php if (!empty($editCat['cover_path'])): ?>
               <div style="margin-top:10px;border-radius:10px;overflow:hidden;border:1px solid #e3dbcf;">
-                <img src="/montepio/<?= h($editCat['cover_path']) ?>" alt="" style="display:block;width:100%;height:120px;object-fit:cover;">
+                <img src="/Montepio/<?= h($editCat['cover_path']) ?>" alt="" style="display:block;width:100%;height:120px;object-fit:cover;">
               </div>
             <?php endif; ?>
           </div>
