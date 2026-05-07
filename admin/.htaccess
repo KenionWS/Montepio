@@ -1,0 +1,4 @@
+# Protege los includes de acceso directo
+<FilesMatch "^(config|db|auth|image|helpers|layout)\.php$">
+    Require all denied
+</FilesMatch>

@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    DirectoryIndex index.php index.html
+
+    RewriteEngine On
+    RewriteBase /montepio/
+
+    RewriteRule ^catalogo/(.*)$ /montepio/index.php/catalogo/$1 [L,QSA]
+    RewriteRule ^catalogo$ /montepio/index.php/catalogo [L,QSA]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>

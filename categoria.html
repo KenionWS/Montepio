@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dormitorio — Montepio Antigüedades</title>
+  <link rel="icon" type="image/x-icon" href="/montepio/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green:      #004d33;
+      --green-dark: #003324;
+      --green-mid:  #005c3d;
+      --gold:       #c9a84c;
+      --cream:      #faf8f4;
+      --warm-white: #ffffff;
+      --gray-light: #f2efe9;
+      --gray-mid:   #9e9890;
+      --gray-dark:  #3a3630;
+      --text:       #2b2820;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    /* ─── TOPBAR ─── */
+    .topbar { background: var(--green-dark); color: rgba(255,255,255,0.75); font-size: 12px; letter-spacing: 0.03em; padding: 8px 0; }
+    .topbar .inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .topbar a { color: inherit; text-decoration: none; transition: color .2s; }
+    .topbar a:hover { color: var(--gold); }
+    .topbar .contact-group { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+    .topbar .contact-item { display: flex; align-items: center; gap: 6px; }
+
+    /* ─── HEADER ─── */
+    header { background: var(--warm-white); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 rgba(0,0,0,0.08); }
+    .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 24px; }
+    .logo { text-decoration: none; flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
+    .logo-image { display: block; height: 56px; width: auto; }
+    .search-bar { flex: 1; max-width: 360px; position: relative; }
+    .search-bar input { width: 100%; padding: 9px 16px 9px 40px; border: 1px solid #e0dbd2; border-radius: 6px; background: var(--gray-light); font-size: 13px; color: var(--text); font-family: 'Inter', sans-serif; outline: none; transition: border-color .2s, background .2s; }
+    .search-bar input:focus { border-color: var(--green); background: white; }
+    .search-bar input::placeholder { color: var(--gray-mid); }
+    .search-bar .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--gray-mid); pointer-events: none; }
+    .header-cta { background: var(--green); color: white; padding: 9px 18px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 7px; transition: background .2s; white-space: nowrap; flex-shrink: 0; }
+    .header-cta:hover { background: var(--green-mid); }
+
+    /* ─── NAV ─── */
+    nav { background: var(--green); overflow-x: auto; position: relative; z-index: 90; }
+    nav::-webkit-scrollbar { display: none; }
+    .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; }
+    .nav-item { position: relative; }
+    .nav-item > a, .nav-inner > a {
+      color: rgba(255,255,255,0.82); text-decoration: none; font-size: 12px; font-weight: 500;
+      letter-spacing: 0.07em; text-transform: uppercase; padding: 13px 14px; white-space: nowrap;
+      display: flex; align-items: center; gap: 5px; transition: color .2s, background .2s; position: relative;
+    }
+    .nav-item > a::after, .nav-inner > a::after {
+      content: ''; position: absolute; bottom: 0; left: 14px; right: 14px; height: 2px;
+      background: var(--gold); transform: scaleX(0); transition: transform .2s;
+    }
+    .nav-item > a.active, .nav-item > a.active::after { color: white; transform: scaleX(1); }
+    .nav-item > a:hover, .nav-inner > a:hover, .nav-item:hover > a { color: white; background: rgba(255,255,255,0.06); }
+    .nav-item > a:hover::after, .nav-inner > a:hover::after, .nav-item:hover > a::after { transform: scaleX(1); }
+    .nav-chevron { width: 10px; height: 10px; transition: transform .2s; opacity: 0.7; }
+    .nav-item:hover > a .nav-chevron { transform: rotate(180deg); opacity: 1; }
+
+    .submenu { display: none; position: absolute; top: 100%; left: 0; min-width: 560px; background: white; border-radius: 0 10px 10px 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.14); z-index: 200; overflow: hidden; }
+    .nav-item:hover .submenu { display: flex; }
+    .submenu-aside { background: var(--green); padding: 28px 24px; min-width: 180px; display: flex; flex-direction: column; justify-content: space-between; }
+    .submenu-aside h4 { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: white; margin-bottom: 6px; line-height: 1.2; }
+    .submenu-aside p { font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.5; margin-bottom: 20px; }
+    .submenu-aside-link { display: inline-flex; align-items: center; gap: 6px; background: var(--gold); color: white; text-decoration: none; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; padding: 7px 13px; border-radius: 5px; transition: background .2s; width: fit-content; }
+    .submenu-aside-link:hover { background: #b8933e; }
+    .submenu-body { flex: 1; padding: 20px 20px 20px 4px; }
+    .submenu-body h5 { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gray-mid); padding: 0 12px; margin-bottom: 8px; }
+    .submenu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+    .submenu-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 7px; transition: background .15s, color .15s; }
+    .submenu-link:hover { background: var(--gray-light); color: var(--green); }
+    .sub-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; flex-shrink: 0; opacity: 0.6; transition: opacity .15s; }
+    .submenu-link:hover .sub-dot { opacity: 1; }
+
+    /* ─── BREADCRUMB ─── */
+    .breadcrumb-bar { background: var(--warm-white); border-bottom: 1px solid #ece7dd; padding: 12px 0; }
+    .breadcrumb-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--gray-mid); }
+    .breadcrumb-inner a { color: var(--gray-mid); text-decoration: none; transition: color .2s; }
+    .breadcrumb-inner a:hover { color: var(--green); }
+    .breadcrumb-inner .sep { opacity: 0.4; }
+    .breadcrumb-inner .current { color: var(--text); font-weight: 500; }
+
+    /* ─── CATEGORY HERO ─── */
+    .cat-hero {
+      background: var(--green);
+      padding: 48px 0 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .cat-hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 360px; height: 360px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .cat-hero-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 32px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      gap: 24px;
+    }
+    .cat-hero-text { padding-bottom: 36px; }
+    .cat-hero-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 12px; border-radius: 100px; margin-bottom: 14px; }
+    .cat-hero h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700; color: white; line-height: 1.1; margin-bottom: 8px; }
+    .cat-hero p { font-size: 14px; color: rgba(255,255,255,0.6); max-width: 420px; }
+    .cat-hero-subcats { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 36px; align-self: flex-end; }
+    .subcat-pill {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.75);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background .2s, color .2s, border-color .2s;
+      white-space: nowrap;
+    }
+    .subcat-pill:hover, .subcat-pill.active { background: var(--gold); border-color: var(--gold); color: white; }
+
+    /* ─── MAIN LAYOUT ─── */
+    .page-body { max-width: 1200px; margin: 0 auto; padding: 36px 32px 80px; display: grid; grid-template-columns: 240px 1fr; gap: 32px; }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar { display: flex; flex-direction: column; gap: 4px; }
+    .filter-block { background: var(--warm-white); border: 1px solid #ece7dd; border-radius: 10px; overflow: hidden; }
+    .filter-header {
+      padding: 14px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .filter-header h4 { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
+    .filter-header svg { color: var(--gray-mid); transition: transform .2s; }
+    .filter-header.open svg { transform: rotate(180deg); }
+    .filter-body { padding: 4px 18px 16px; border-top: 1px solid #ece7dd; }
+    .filter-option {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0;
+      cursor: pointer;
+    }
+    .filter-option label { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--text); cursor: pointer; }
+    .filter-option input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--green); cursor: pointer; }
+    .filter-count { font-size: 11px; color: var(--gray-mid); background: var(--gray-light); padding: 1px 7px; border-radius: 100px; }
+
+    .price-range { padding: 4px 0; }
+    .price-inputs { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+    .price-inputs input {
+      flex: 1; padding: 7px 10px; border: 1px solid #e0dbd2; border-radius: 6px;
+      font-size: 12px; font-family: 'Inter', sans-serif; color: var(--text); outline: none;
+      transition: border-color .2s;
+    }
+    .price-inputs input:focus { border-color: var(--green); }
+    .price-inputs span { color: var(--gray-mid); font-size: 12px; flex-shrink: 0; }
+    .btn-filter {
+      width: 100%; margin-top: 10px; padding: 8px;
+      background: var(--green); color: white; border: none; border-radius: 6px;
+      font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: background .2s;
+    }
+    .btn-filter:hover { background: var(--green-mid); }
+
+    .sidebar-clear { text-align: center; padding: 8px; }
+    .sidebar-clear a { font-size: 12px; color: var(--gray-mid); text-decoration: none; transition: color .2s; }
+    .sidebar-clear a:hover { color: var(--green); }
+
+    /* ─── PRODUCTS AREA ─── */
+    .products-area {}
+    .products-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; gap: 16px; flex-wrap: wrap;
+    }
+    .products-count { font-size: 13px; color: var(--gray-mid); }
+    .products-count strong { color: var(--text); font-weight: 600; }
+    .toolbar-right { display: flex; align-items: center; gap: 12px; }
+    .sort-select {
+      padding: 7px 12px; border: 1px solid #e0dbd2; border-radius: 6px;
+      font-size: 13px; font-family: 'Inter', sans-serif; color: var(--text);
+      background: var(--warm-white); outline: none; cursor: pointer;
+    }
+    .view-toggle { display: flex; border: 1px solid #e0dbd2; border-radius: 6px; overflow: hidden; }
+    .view-btn { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--gray-mid); background: white; border: none; transition: background .15s, color .15s; }
+    .view-btn.active { background: var(--green); color: white; }
+
+    /* ─── PRODUCT GRID ─── */
+    .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .product-card {
+      background: var(--warm-white);
+      border: 1px solid #ece7dd;
+      border-radius: 10px;
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--text);
+      transition: box-shadow .2s, transform .2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .product-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.1); transform: translateY(-3px); }
+    .product-img {
+      width: 100%; aspect-ratio: 1/1;
+      background: var(--gray-light);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .product-img span { font-size: 48px; opacity: 0.3; }
+    .product-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: var(--gold); color: white;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+      padding: 3px 9px; border-radius: 4px;
+    }
+    .product-badge.new { background: var(--green); }
+    .product-wishlist {
+      position: absolute; top: 10px; right: 10px;
+      width: 30px; height: 30px; background: white; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      color: var(--gray-mid);
+      opacity: 0;
+      transition: opacity .2s, color .2s;
+    }
+    .product-card:hover .product-wishlist { opacity: 1; }
+    .product-wishlist:hover { color: #e05252; }
+    .product-info { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .product-subcat { font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); }
+    .product-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .product-desc { font-size: 12px; color: var(--gray-mid); line-height: 1.5; flex: 1; }
+    .product-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+    .product-price { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--green); }
+    .product-price small { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 400; color: var(--gray-mid); display: block; }
+    .product-btn {
+      width: 32px; height: 32px; background: var(--green); color: white;
+      border-radius: 7px; display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .product-btn:hover { background: var(--green-mid); }
+
+    /* ─── PAGINATION ─── */
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 48px; }
+    .page-btn {
+      width: 36px; height: 36px; border-radius: 7px; display: flex; align-items: center;
+      justify-content: center; font-size: 13px; font-weight: 500; text-decoration: none;
+      border: 1px solid #e0dbd2; color: var(--text); background: white; transition: all .2s;
+    }
+    .page-btn:hover { border-color: var(--green); color: var(--green); }
+    .page-btn.active { background: var(--green); border-color: var(--green); color: white; }
+    .page-btn.arrow { color: var(--gray-mid); }
+
+    /* ─── WHATSAPP FLOAT ─── */
+    .wa-float { position: fixed; bottom: 28px; right: 28px; z-index: 999; background: #25D366; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(37,211,102,0.4); text-decoration: none; transition: transform .2s; }
+    .wa-float:hover { transform: scale(1.08); }
+
+    /* ─── FOOTER ─── */
+    footer { background: var(--gray-dark); color: rgba(255,255,255,0.6); }
+    .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 24px 32px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(255,255,255,0.3); flex-wrap: wrap; gap: 8px; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .page-body { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .products-grid { grid-template-columns: repeat(2, 1fr); }
+      .cat-hero-subcats { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="inner">
+    <div class="contact-group">
+      <a href="tel:46121221" class="contact-item">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.77 9.11 19.79 19.79 0 01.7.5 2 2 0 012.68 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+        4612-1221 / 4612-8787
+      </a>
+      <a href="https://wa.me/5491165714568" class="contact-item">
+        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        116571-4568
+      </a>
+    </div>
+    <div class="contact-group">
+      <span class="contact-item">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Av. Rivadavia 7701, CABA
+      </span>
+      <a href="mailto:montepioantiguedades@gmail.com" class="contact-item">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        montepioantiguedades@gmail.com
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <img src="/montepio/assets/brand/montepio-logo.jpg" alt="Montepio Antiguedades" class="logo-image" />
+    </a>
+    <div class="search-bar">
+      <svg class="icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Buscar en el catálogo..." />
+    </div>
+    <a href="https://wa.me/5491165714568" class="header-cta">
+      <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Consultanos
+    </a>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-item">
+      <a href="categoria.html" class="active">
+        Dormitorio
+        <svg class="nav-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </a>
+      <div class="submenu">
+        <div class="submenu-aside">
+          <div>
+            <h4>Dormitorio</h4>
+            <p>Camas, cómodas, armarios y todo para el cuarto.</p>
+          </div>
+          <a href="categoria.html" class="submenu-aside-link">
+            Ver todo
+            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="submenu-body">
+          <h5>Subcategorías</h5>
+          <div class="submenu-grid">
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Camas y sommiers</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Mesas de luz</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Cómodas</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Armarios y roperos</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Tocadores</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Veladores</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Cabeceras</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Baúles y arcones</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item">
+      <a href="#">
+        Comedor
+        <svg class="nav-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </a>
+      <div class="submenu">
+        <div class="submenu-aside">
+          <div><h4>Comedor</h4><p>Mesas, sillas, aparadores y vitrinas de época.</p></div>
+          <a href="#" class="submenu-aside-link">Ver todo <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+        <div class="submenu-body">
+          <h5>Subcategorías</h5>
+          <div class="submenu-grid">
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Mesas de comedor</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Sillas de comedor</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Aparadores</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Vitrinas</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Buffets</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Juegos completos</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a href="#">Escritorio</a>
+    <a href="#">Living</a>
+    <a href="#">Iluminación</a>
+    <a href="#">Decoración</a>
+    <a href="#">Exterior</a>
+    <a href="#">Mid Century</a>
+    <a href="#">Restauraciones</a>
+    <a href="#">Compra Online</a>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar">
+  <div class="breadcrumb-inner">
+    <a href="index.html">Inicio</a>
+    <span class="sep">›</span>
+    <a href="index.html#categorias">Categorías</a>
+    <span class="sep">›</span>
+    <span class="current">Dormitorio</span>
+  </div>
+</div>
+
+<!-- CATEGORY HERO -->
+<div class="cat-hero">
+  <div class="cat-hero-inner">
+    <div class="cat-hero-text">
+      <div class="cat-hero-tag">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        Categoría
+      </div>
+      <h1>Dormitorio</h1>
+      <p>48 piezas únicas — camas, cómodas, armarios y accesorios de época para el cuarto.</p>
+    </div>
+    <div class="cat-hero-subcats">
+      <a href="#" class="subcat-pill active">Todo</a>
+      <a href="#" class="subcat-pill">Camas</a>
+      <a href="#" class="subcat-pill">Mesas de luz</a>
+      <a href="#" class="subcat-pill">Cómodas</a>
+      <a href="#" class="subcat-pill">Armarios</a>
+      <a href="#" class="subcat-pill">Tocadores</a>
+      <a href="#" class="subcat-pill">Baúles</a>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN BODY -->
+<div class="page-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="filter-block">
+      <div class="filter-header open" onclick="this.classList.toggle('open'); this.nextElementSibling.style.display = this.classList.contains('open') ? '' : 'none'">
+        <h4>Subcategoría</h4>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="filter-body">
+        <div class="filter-option">
+          <label><input type="checkbox" checked /> Camas y sommiers</label>
+          <span class="filter-count">12</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Mesas de luz</label>
+          <span class="filter-count">9</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Cómodas</label>
+          <span class="filter-count">8</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Armarios y roperos</label>
+          <span class="filter-count">6</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Tocadores</label>
+          <span class="filter-count">5</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Veladores</label>
+          <span class="filter-count">4</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Baúles y arcones</label>
+          <span class="filter-count">4</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-header open" onclick="this.classList.toggle('open'); this.nextElementSibling.style.display = this.classList.contains('open') ? '' : 'none'">
+        <h4>Precio</h4>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="filter-body">
+        <div class="price-range">
+          <div class="price-inputs">
+            <input type="number" placeholder="Mín $" />
+            <span>—</span>
+            <input type="number" placeholder="Máx $" />
+          </div>
+          <button class="btn-filter">Aplicar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-header open" onclick="this.classList.toggle('open'); this.nextElementSibling.style.display = this.classList.contains('open') ? '' : 'none'">
+        <h4>Estilo</h4>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="filter-body">
+        <div class="filter-option">
+          <label><input type="checkbox" /> Victoriano</label>
+          <span class="filter-count">14</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Art Decó</label>
+          <span class="filter-count">11</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Mid Century</label>
+          <span class="filter-count">8</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Luis XV / XVI</label>
+          <span class="filter-count">7</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Provenzal</label>
+          <span class="filter-count">5</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Industrial</label>
+          <span class="filter-count">3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-header open" onclick="this.classList.toggle('open'); this.nextElementSibling.style.display = this.classList.contains('open') ? '' : 'none'">
+        <h4>Estado</h4>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="filter-body">
+        <div class="filter-option">
+          <label><input type="checkbox" /> Excelente</label>
+          <span class="filter-count">20</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Muy bueno</label>
+          <span class="filter-count">17</span>
+        </div>
+        <div class="filter-option">
+          <label><input type="checkbox" /> Para restaurar</label>
+          <span class="filter-count">11</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-clear">
+      <a href="#">Limpiar filtros</a>
+    </div>
+
+  </aside>
+
+  <!-- PRODUCTS -->
+  <div class="products-area">
+
+    <div class="products-toolbar">
+      <p class="products-count"><strong>48 piezas</strong> en Dormitorio</p>
+      <div class="toolbar-right">
+        <select class="sort-select">
+          <option>Más recientes</option>
+          <option>Precio: menor a mayor</option>
+          <option>Precio: mayor a menor</option>
+          <option>Nombre A–Z</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" title="Grilla">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+          </button>
+          <button class="view-btn" title="Lista">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="products-grid">
+
+      <a href="#" class="product-card">
+        <div class="product-img">
+          <span>🛏️</span>
+          <div class="product-badge new">Nuevo</div>
+          <div class="product-wishlist">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+        </div>
+        <div class="product-info">
+          <span class="product-subcat">Cama</span>
+          <span class="product-name">Cama de bronce con dosel — estilo victoriano</span>
+          <span class="product-desc">Estructura original en bronce macizo, ca. 1890. Estado excelente.</span>
+          <div class="product-footer">
+            <div class="product-price">
+              Consultar
+              <small>Precio a convenir</small>
+            </div>
+            <div class="product-btn">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="product-card">
+        <div class="product-img">
+          <span>🪞</span>
+          <div class="product-badge">Destacado</div>
+          <div class="product-wishlist">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+        </div>
+        <div class="product-info">
+          <span class="product-subcat">Tocador</span>
+          <span class="product-name">Tocador con espejo Art Decó — madera de nogal</span>
+          <span class="product-desc">3 cajones con tiradores originales. Restaurado. Ca. 1930.</span>
+          <div class="product-footer">
+            <div class="product-price">
+              $380.000
+              <small>Precio final</small>
+            </div>
+            <div class="product-btn">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="product-card">
+        <div class="product-img">
+          <span>🗄️</span>
+          <div class="product-wishlist">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+        </div>
+        <div class="product-info">
+          <span class="product-subcat">Cómoda</span>
+          <span class="product-name">Cómoda Luis XV — 5 cajones en madera lacada</span>
+          <span class="product-desc">Patas cabriolé, herrajes dorados originales. Muy buen estado.</span>
+          <div class="product-footer">
+            <div class="product-price">
+              $290.000
+              <small>Precio final</small>
+            </div>
+            <div class="product-btn">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="product-card">
+        <div class="product-img">
+          <span>🛏️</span>
+          <div class="product-wishlist">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+        </div>
+        <div class="product-info">
+          <span class="product-subcat">Mesa de luz</span>
+          <span class="product-name">Par de mesas de luz — estilo provenzal</span>
+          <span class="product-desc">Se venden en par. Madera pintada envejecida, 1 cajón c/u.</span>
+          <div class="product-footer">
+            <div class="product-price">
+              $145.000
+              <small>El par</small>
+            </div>
+            <div class="product-btn">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="product-card">
+        <div class="product-img">
+          <span>🗄️</span>
+          <div class="product-badge">Para restaurar</div>
+          <div class="product-wishlist">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+        </div>
+        <div class="product-info">
+          <span class="product-subcat">Armario</span>
+          <span class="product-name">Ropero de 3 cuerpos — madera de cedro</span>
+          <span class="product-desc">Interior en perfecto estado. Exterior requiere restauración. Ca. 1940.</span>
+          <div class="product-footer">
+            <div class="product-price">
+              $180.000
+              <small>Precio final</small>
+            </div>
+            <div class="product-btn">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="product-card">
+        <div class="product-img">
+          <span>🧳</span>
+          <div class="product-badge new">Nuevo</div>
+          <div class="product-wishlist">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+        </div>
+        <div class="product-info">
+          <span class="product-subcat">Baúl</span>
+          <span class="product-name">Baúl de madera y cuero — herrajes de hierro</span>
+          <span class="product-desc">Tapa abovedada, interior forrado en tela original. Ca. 1910.</span>
+          <div class="product-footer">
+            <div class="product-price">
+              $95.000
+              <small>Precio final</small>
+            </div>
+            <div class="product-btn">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <a href="#" class="page-btn arrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
+      <a href="#" class="page-btn active">1</a>
+      <a href="#" class="page-btn">2</a>
+      <a href="#" class="page-btn">3</a>
+      <a href="#" class="page-btn">4</a>
+      <span class="page-btn" style="border:none;color:var(--gray-mid);cursor:default">…</span>
+      <a href="#" class="page-btn">8</a>
+      <a href="#" class="page-btn arrow">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-bottom">
+    <span>© 2026 Montepio Antigüedades. Todos los derechos reservados.</span>
+    <a href="index.html" style="color:rgba(255,255,255,0.4); text-decoration:none; transition:color .2s;">← Volver al inicio</a>
+  </div>
+</footer>
+
+<!-- WHATSAPP FLOAT -->
+<a href="https://wa.me/5491165714568?text=Hola,%20vi%20su%20web%20y%20quiero%20consultar" class="wa-float" target="_blank" rel="noopener">
+  <svg width="26" height="26" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+</body>
+</html>
+

@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cama de bronce con dosel — Montepio Antigüedades</title>
+  <link rel="icon" type="image/x-icon" href="/montepio/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green:      #004d33;
+      --green-dark: #003324;
+      --green-mid:  #005c3d;
+      --gold:       #c9a84c;
+      --cream:      #faf8f4;
+      --warm-white: #ffffff;
+      --gray-light: #f2efe9;
+      --gray-mid:   #9e9890;
+      --gray-dark:  #3a3630;
+      --text:       #2b2820;
+      --wa:         #25D366;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    /* ─── TOPBAR ─── */
+    .topbar { background: var(--green-dark); color: rgba(255,255,255,0.75); font-size: 12px; padding: 8px 0; }
+    .topbar .inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .topbar a { color: inherit; text-decoration: none; transition: color .2s; }
+    .topbar a:hover { color: var(--gold); }
+    .contact-group { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+    .contact-item { display: flex; align-items: center; gap: 6px; }
+
+    /* ─── HEADER ─── */
+    header { background: var(--warm-white); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 0 rgba(0,0,0,0.08); }
+    .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 24px; }
+    .logo { text-decoration: none; flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
+    .logo-image { display: block; height: 56px; width: auto; }
+    .search-bar { flex: 1; max-width: 360px; position: relative; }
+    .search-bar input { width: 100%; padding: 9px 16px 9px 40px; border: 1px solid #e0dbd2; border-radius: 6px; background: var(--gray-light); font-size: 13px; font-family: 'Inter', sans-serif; outline: none; transition: border-color .2s; }
+    .search-bar input:focus { border-color: var(--green); background: white; }
+    .search-bar input::placeholder { color: var(--gray-mid); }
+    .search-bar .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--gray-mid); pointer-events: none; }
+    .header-cta { background: var(--green); color: white; padding: 9px 18px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 7px; transition: background .2s; white-space: nowrap; }
+    .header-cta:hover { background: var(--green-mid); }
+
+    /* ─── NAV ─── */
+    nav { background: var(--green); overflow-x: auto; position: relative; z-index: 90; }
+    nav::-webkit-scrollbar { display: none; }
+    .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; }
+    .nav-item { position: relative; }
+    .nav-item > a, .nav-inner > a { color: rgba(255,255,255,0.82); text-decoration: none; font-size: 12px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; padding: 13px 14px; white-space: nowrap; display: flex; align-items: center; gap: 5px; transition: color .2s, background .2s; position: relative; }
+    .nav-item > a::after, .nav-inner > a::after { content: ''; position: absolute; bottom: 0; left: 14px; right: 14px; height: 2px; background: var(--gold); transform: scaleX(0); transition: transform .2s; }
+    .nav-item > a:hover, .nav-inner > a:hover, .nav-item:hover > a { color: white; background: rgba(255,255,255,0.06); }
+    .nav-item > a:hover::after, .nav-inner > a:hover::after, .nav-item:hover > a::after { transform: scaleX(1); }
+    .nav-chevron { width: 10px; height: 10px; transition: transform .2s; opacity: 0.7; }
+    .nav-item:hover > a .nav-chevron { transform: rotate(180deg); opacity: 1; }
+    .submenu { display: none; position: absolute; top: 100%; left: 0; min-width: 560px; background: white; border-radius: 0 10px 10px 10px; box-shadow: 0 12px 40px rgba(0,0,0,0.14); z-index: 200; overflow: hidden; }
+    .nav-item:hover .submenu { display: flex; }
+    .submenu-aside { background: var(--green); padding: 28px 24px; min-width: 180px; display: flex; flex-direction: column; justify-content: space-between; }
+    .submenu-aside h4 { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: white; margin-bottom: 6px; }
+    .submenu-aside p { font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.5; margin-bottom: 20px; }
+    .submenu-aside-link { display: inline-flex; align-items: center; gap: 6px; background: var(--gold); color: white; text-decoration: none; font-size: 11px; font-weight: 600; padding: 7px 13px; border-radius: 5px; transition: background .2s; width: fit-content; }
+    .submenu-aside-link:hover { background: #b8933e; }
+    .submenu-body { flex: 1; padding: 20px 20px 20px 4px; }
+    .submenu-body h5 { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gray-mid); padding: 0 12px; margin-bottom: 8px; }
+    .submenu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+    .submenu-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; text-decoration: none; color: var(--text); font-size: 13px; border-radius: 7px; transition: background .15s, color .15s; }
+    .submenu-link:hover { background: var(--gray-light); color: var(--green); }
+    .sub-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; flex-shrink: 0; opacity: 0.6; transition: opacity .15s; }
+    .submenu-link:hover .sub-dot { opacity: 1; }
+
+    /* ─── BREADCRUMB ─── */
+    .breadcrumb-bar { background: var(--warm-white); border-bottom: 1px solid #ece7dd; padding: 12px 0; }
+    .breadcrumb-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--gray-mid); }
+    .breadcrumb-inner a { color: var(--gray-mid); text-decoration: none; transition: color .2s; }
+    .breadcrumb-inner a:hover { color: var(--green); }
+    .breadcrumb-inner .sep { opacity: 0.4; }
+    .breadcrumb-inner .current { color: var(--text); font-weight: 500; }
+
+    /* ─── PRODUCT MAIN ─── */
+    .product-main { max-width: 1200px; margin: 0 auto; padding: 40px 32px 64px; display: grid; grid-template-columns: 1fr 480px; gap: 56px; align-items: start; }
+
+    /* ─── GALLERY ─── */
+    .gallery { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 100px; }
+    .gallery-main {
+      width: 100%; aspect-ratio: 1/1;
+      background: var(--gray-light);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 100px;
+      position: relative;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+    .gallery-main img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-nav-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 38px; height: 38px; background: white; border-radius: 50%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: none; color: var(--text);
+      transition: box-shadow .2s;
+    }
+    .gallery-nav-btn:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.18); }
+    .gallery-nav-btn.prev { left: 12px; }
+    .gallery-nav-btn.next { right: 12px; }
+    .gallery-thumbs { display: flex; gap: 8px; }
+    .gallery-thumb {
+      flex: 1; aspect-ratio: 1/1; border-radius: 8px;
+      background: var(--gray-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; cursor: pointer;
+      border: 2px solid transparent;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .gallery-thumb.active { border-color: var(--green); }
+    .gallery-thumb:hover { border-color: var(--gold); }
+    .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ─── PRODUCT INFO ─── */
+    .product-info { display: flex; flex-direction: column; gap: 0; }
+
+    .prod-top-badges { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .badge-cat {
+      background: var(--gray-light); color: var(--green);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 100px;
+      text-decoration: none; transition: background .2s;
+    }
+    .badge-cat:hover { background: #d6ede4; }
+    .badge-status {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 100px;
+    }
+    .badge-status.venta { background: #edf7f1; color: var(--green); border: 1px solid #b8dfc9; }
+    .badge-status.alquiler { background: #fff8e8; color: #8a6500; border: 1px solid #f0d98a; }
+    .badge-status.reservado { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    .prod-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 30px; font-weight: 700; color: var(--text);
+      line-height: 1.2; margin-bottom: 10px;
+    }
+    .prod-style { font-size: 13px; color: var(--gray-mid); margin-bottom: 20px; display: flex; align-items: center; gap: 6px; }
+    .prod-style span { color: var(--gold); font-weight: 500; }
+
+    .prod-divider { height: 1px; background: #ece7dd; margin: 20px 0; }
+
+    /* ficha técnica */
+    .prod-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 4px; }
+    .spec-item { padding: 10px 0; border-bottom: 1px solid #f0ebe3; display: flex; flex-direction: column; gap: 2px; }
+    .spec-item:nth-child(odd) { padding-right: 20px; }
+    .spec-label { font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray-mid); }
+    .spec-value { font-size: 13px; font-weight: 500; color: var(--text); }
+
+    .prod-desc { font-size: 14px; color: #5a5450; line-height: 1.75; margin: 20px 0; }
+
+    /* ─── PRECIO / CTA — VENTA ─── */
+    .buy-block {
+      background: var(--warm-white);
+      border: 1px solid #ece7dd;
+      border-radius: 14px;
+      padding: 24px;
+      display: flex; flex-direction: column; gap: 16px;
+      margin-top: 4px;
+    }
+    .price-row { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+    .price-main {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px; font-weight: 700; color: var(--green); line-height: 1;
+    }
+    .price-note { font-size: 12px; color: var(--gray-mid); padding-bottom: 3px; }
+    .price-disclaimer { font-size: 12px; color: var(--gray-mid); line-height: 1.5; }
+
+    .btn-wa-pago {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: var(--wa); color: white;
+      padding: 15px 24px; border-radius: 10px;
+      text-decoration: none; font-size: 15px; font-weight: 600;
+      transition: background .2s, transform .15s;
+    }
+    .btn-wa-pago:hover { background: #1db954; transform: translateY(-1px); }
+    .btn-wa-pago svg { flex-shrink: 0; }
+
+    .btn-wa-consulta {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: white; color: var(--green);
+      padding: 13px 24px; border-radius: 10px;
+      text-decoration: none; font-size: 14px; font-weight: 600;
+      border: 1.5px solid var(--green);
+      transition: background .2s, color .2s;
+    }
+    .btn-wa-consulta:hover { background: var(--green); color: white; }
+
+    /* ─── PRECIO / CTA — ALQUILER ─── */
+    .rent-block {
+      background: #fffdf5;
+      border: 1px solid #f0d98a;
+      border-radius: 14px;
+      padding: 24px;
+      display: flex; flex-direction: column; gap: 16px;
+      margin-top: 4px;
+    }
+    .rent-header { display: flex; align-items: center; gap: 12px; }
+    .rent-icon {
+      width: 44px; height: 44px; background: #fff8e8; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .rent-header-text h4 { font-size: 15px; font-weight: 700; color: var(--text); }
+    .rent-header-text p { font-size: 12px; color: var(--gray-mid); }
+    .rent-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .rent-tag {
+      background: white; border: 1px solid #e8d9a0; color: #8a6500;
+      font-size: 11px; font-weight: 500; padding: 4px 11px; border-radius: 100px;
+    }
+
+    .btn-wa-rent {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: var(--wa); color: white;
+      padding: 15px 24px; border-radius: 10px;
+      text-decoration: none; font-size: 15px; font-weight: 600;
+      transition: background .2s, transform .15s;
+    }
+    .btn-wa-rent:hover { background: #1db954; transform: translateY(-1px); }
+
+    /* acciones secundarias */
+    .prod-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .action-btn {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 9px 12px; border-radius: 8px;
+      background: var(--gray-light); color: var(--gray-dark);
+      font-size: 12px; font-weight: 500; text-decoration: none; cursor: pointer;
+      border: none; font-family: 'Inter', sans-serif;
+      transition: background .2s, color .2s;
+    }
+    .action-btn:hover { background: #e5ded4; color: var(--text); }
+
+    /* ─── DEMO SWITCH ─── */
+    .demo-switch {
+      background: var(--warm-white); border: 1px solid #ece7dd; border-radius: 10px;
+      padding: 16px 20px; margin-bottom: 28px; display: flex; align-items: center;
+      justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .demo-switch p { font-size: 12px; color: var(--gray-mid); }
+    .demo-switch strong { color: var(--text); }
+    .demo-toggle { display: flex; gap: 6px; }
+    .demo-btn {
+      padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid #e0dbd2; background: white; color: var(--gray-mid);
+      font-family: 'Inter', sans-serif; transition: all .2s;
+    }
+    .demo-btn.active { border-color: var(--green); background: var(--green); color: white; }
+
+    /* ─── TABS DE DETALLE ─── */
+    .prod-tabs { margin-top: 64px; }
+    .tab-nav { display: flex; border-bottom: 2px solid #ece7dd; gap: 0; }
+    .tab-btn {
+      padding: 12px 24px; font-size: 13px; font-weight: 600; cursor: pointer;
+      border: none; background: none; font-family: 'Inter', sans-serif; color: var(--gray-mid);
+      position: relative; transition: color .2s;
+    }
+    .tab-btn::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--green); transform: scaleX(0); transition: transform .2s; }
+    .tab-btn.active { color: var(--green); }
+    .tab-btn.active::after { transform: scaleX(1); }
+    .tab-content { padding: 28px 0; display: none; }
+    .tab-content.active { display: block; }
+
+    .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .detail-card { background: var(--warm-white); border: 1px solid #ece7dd; border-radius: 10px; padding: 18px 20px; }
+    .detail-card h5 { font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+    .detail-card p { font-size: 13px; color: var(--gray-dark); line-height: 1.6; }
+
+    .history-text { font-size: 14px; color: #5a5450; line-height: 1.8; max-width: 760px; }
+    .history-text p + p { margin-top: 14px; }
+
+    /* ─── RELATED ─── */
+    .related-section { background: var(--warm-white); padding: 64px 0; border-top: 1px solid #ece7dd; }
+    .related-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+    .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 28px; }
+    .related-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .product-card { background: var(--cream); border: 1px solid #ece7dd; border-radius: 10px; overflow: hidden; text-decoration: none; color: var(--text); transition: box-shadow .2s, transform .2s; display: flex; flex-direction: column; }
+    .product-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.1); transform: translateY(-3px); }
+    .product-img { width: 100%; aspect-ratio: 1/1; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 44px; position: relative; }
+    .product-badge-sm { position: absolute; top: 8px; left: 8px; background: var(--gold); color: white; font-size: 9px; font-weight: 600; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 3px; }
+    .product-badge-sm.rent { background: #8a6500; }
+    .product-info-sm { padding: 12px 14px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .product-info-sm .sub { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+    .product-info-sm .name { font-size: 13px; font-weight: 600; line-height: 1.3; }
+    .product-info-sm .price { font-size: 15px; font-weight: 700; color: var(--green); margin-top: 6px; font-family: 'Playfair Display', serif; }
+    .product-info-sm .price.consultar { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: #8a6500; }
+
+    /* ─── WA FLOAT ─── */
+    .wa-float { position: fixed; bottom: 28px; right: 28px; z-index: 999; background: var(--wa); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(37,211,102,0.4); text-decoration: none; transition: transform .2s; }
+    .wa-float:hover { transform: scale(1.08); }
+
+    /* ─── FOOTER ─── */
+    footer { background: var(--gray-dark); }
+    .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 24px 32px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(255,255,255,0.3); flex-wrap: wrap; gap: 8px; }
+    .footer-bottom a { color: rgba(255,255,255,0.4); text-decoration: none; transition: color .2s; }
+    .footer-bottom a:hover { color: var(--gold); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .product-main { grid-template-columns: 1fr; gap: 32px; }
+      .gallery { position: static; }
+      .related-grid { grid-template-columns: repeat(2, 1fr); }
+      .detail-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .prod-name { font-size: 24px; }
+      .price-main { font-size: 28px; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="inner">
+    <div class="contact-group">
+      <a href="tel:46121221" class="contact-item">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.77 9.11 19.79 19.79 0 01.7.5 2 2 0 012.68 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+        4612-1221 / 4612-8787
+      </a>
+      <a href="https://wa.me/5491165714568" class="contact-item">
+        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        116571-4568
+      </a>
+    </div>
+    <div class="contact-group">
+      <span class="contact-item">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Av. Rivadavia 7701, CABA
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <img src="/montepio/assets/brand/montepio-logo.jpg" alt="Montepio Antiguedades" class="logo-image" />
+    </a>
+    <div class="search-bar">
+      <svg class="icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Buscar en el catálogo..." />
+    </div>
+    <a href="https://wa.me/5491165714568" class="header-cta">
+      <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Consultanos
+    </a>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-item">
+      <a href="categoria.html">
+        Dormitorio
+        <svg class="nav-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </a>
+      <div class="submenu">
+        <div class="submenu-aside">
+          <div><h4>Dormitorio</h4><p>Camas, cómodas, armarios y todo para el cuarto.</p></div>
+          <a href="categoria.html" class="submenu-aside-link">Ver todo <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+        <div class="submenu-body">
+          <h5>Subcategorías</h5>
+          <div class="submenu-grid">
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Camas y sommiers</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Mesas de luz</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Cómodas</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Armarios y roperos</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Tocadores</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Veladores</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Cabeceras</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Baúles y arcones</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a href="#">Comedor</a>
+    <a href="#">Escritorio</a>
+    <a href="#">Living</a>
+    <a href="#">Iluminación</a>
+    <a href="#">Decoración</a>
+    <a href="#">Exterior</a>
+    <a href="#">Mid Century</a>
+    <a href="#">Restauraciones</a>
+    <a href="#">Compra Online</a>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar">
+  <div class="breadcrumb-inner">
+    <a href="index.html">Inicio</a>
+    <span class="sep">›</span>
+    <a href="categoria.html">Dormitorio</a>
+    <span class="sep">›</span>
+    <a href="#">Camas</a>
+    <span class="sep">›</span>
+    <span class="current">Cama de bronce con dosel</span>
+  </div>
+</div>
+
+<!-- PRODUCT MAIN -->
+<div class="product-main">
+
+  <!-- GALLERY -->
+  <div class="gallery">
+    <div class="gallery-main" id="mainImg">
+      <span>🛏️</span>
+      <!-- <img src="fotos/cama-bronce-1.jpg" alt="Cama de bronce con dosel"> -->
+      <button class="gallery-nav-btn prev" onclick="changeThumb(-1)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="gallery-nav-btn next" onclick="changeThumb(1)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="gallery-thumbs">
+      <div class="gallery-thumb active" onclick="setThumb(0)">🛏️</div>
+      <div class="gallery-thumb" onclick="setThumb(1)">🔍</div>
+      <div class="gallery-thumb" onclick="setThumb(2)">✨</div>
+      <div class="gallery-thumb" onclick="setThumb(3)">📐</div>
+      <div class="gallery-thumb" onclick="setThumb(4)">🪄</div>
+    </div>
+  </div>
+
+  <!-- INFO -->
+  <div class="product-info">
+
+    <!-- SWITCH DEMO (solo para prototipo) -->
+    <div class="demo-switch">
+      <p><strong>Demo:</strong> Elegí el tipo de producto</p>
+      <div class="demo-toggle">
+        <button class="demo-btn active" onclick="setMode('venta')">Para venta</button>
+        <button class="demo-btn" onclick="setMode('alquiler')">Para alquiler</button>
+      </div>
+    </div>
+
+    <div class="prod-top-badges">
+      <a href="categoria.html" class="badge-cat">Dormitorio › Camas</a>
+      <span class="badge-status venta" id="badgeStatus">En venta</span>
+    </div>
+
+    <h1 class="prod-name">Cama de bronce con dosel — estilo victoriano</h1>
+    <p class="prod-style">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Ca. 1890 &nbsp;·&nbsp; <span>Victoriano</span> &nbsp;·&nbsp; Estado excelente
+    </p>
+
+    <!-- SPECS -->
+    <div class="prod-specs">
+      <div class="spec-item">
+        <span class="spec-label">Material</span>
+        <span class="spec-value">Bronce macizo</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">Época</span>
+        <span class="spec-value">Ca. 1890</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">Dimensiones</span>
+        <span class="spec-value">190 × 140 cm (2 plazas)</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">Estado</span>
+        <span class="spec-value">Excelente</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">Origen</span>
+        <span class="spec-value">Europa (Inglés)</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">Código</span>
+        <span class="spec-value">MP-4821</span>
+      </div>
+    </div>
+
+    <div class="prod-divider"></div>
+
+    <p class="prod-desc">
+      Estructura de cama completa en bronce macizo con dosel de cuatro postes. Presenta ornamentación floral típica del período victoriano tardío con terminación bruñida original. Los barrotes laterales y el larguero son desmontables para facilitar el transporte. Pieza de museo en estado excepcional, sin restauraciones visibles.
+    </p>
+
+    <!-- CTA BLOQUE VENTA -->
+    <div class="buy-block" id="blockVenta">
+      <div class="price-row">
+        <span class="price-main">$680.000</span>
+        <span class="price-note">Precio final · Efectivo o transferencia</span>
+      </div>
+      <p class="price-disclaimer">Precio sujeto a confirmación. Consultanos por formas de pago y posibilidad de envío o retiro en local.</p>
+      <a
+        href="https://wa.me/5491165714568?text=Hola!%20Vi%20la%20*Cama%20de%20bronce%20con%20dosel*%20(código%20MP-4821)%20en%20su%20web%20y%20me%20interesa%20comprarla.%20¿Me%20pueden%20enviar%20el%20link%20de%20pago%3F"
+        target="_blank" rel="noopener"
+        class="btn-wa-pago"
+      >
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Pedir link de pago por WhatsApp
+      </a>
+      <a
+        href="https://wa.me/5491165714568?text=Hola!%20Quiero%20consultar%20por%20la%20*Cama%20de%20bronce%20con%20dosel*%20(código%20MP-4821)"
+        target="_blank" rel="noopener"
+        class="btn-wa-consulta"
+      >
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Consultar antes de comprar
+      </a>
+    </div>
+
+    <!-- CTA BLOQUE ALQUILER -->
+    <div class="rent-block" id="blockAlquiler" style="display:none;">
+      <div class="rent-header">
+        <div class="rent-icon">🎬</div>
+        <div class="rent-header-text">
+          <h4>Disponible para alquiler</h4>
+          <p>Ideal para filmaciones, producciones y eventos</p>
+        </div>
+      </div>
+      <div class="rent-tags">
+        <span class="rent-tag">Filmaciones</span>
+        <span class="rent-tag">Teatros</span>
+        <span class="rent-tag">Eventos</span>
+        <span class="rent-tag">Fotografía</span>
+        <span class="rent-tag">Decoración temporal</span>
+      </div>
+      <a
+        href="https://wa.me/5491165714568?text=Hola!%20Vi%20la%20*Cama%20de%20bronce%20con%20dosel*%20(código%20MP-4821)%20disponible%20para%20alquiler.%20¿Me%20pueden%20informar%20disponibilidad%20y%20precio%3F"
+        target="_blank" rel="noopener"
+        class="btn-wa-rent"
+      >
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Consultar disponibilidad por WhatsApp
+      </a>
+    </div>
+
+    <!-- ACCIONES SECUNDARIAS -->
+    <div class="prod-actions">
+      <button class="action-btn">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        Guardar
+      </button>
+      <button class="action-btn">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Compartir
+      </button>
+      <a href="https://wa.me/5491165714568?text=Hola!%20Quiero%20hacer%20una%20consulta%20sobre%20el%20producto%20MP-4821" target="_blank" class="action-btn">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Consulta general
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- TABS DE DETALLE -->
+<div class="prod-tabs" style="max-width:1200px; margin:0 auto; padding:0 32px;">
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="setTab('ficha', this)">Ficha completa</button>
+    <button class="tab-btn" onclick="setTab('historia', this)">Historia de la pieza</button>
+    <button class="tab-btn" onclick="setTab('envio', this)">Envío y retiro</button>
+  </div>
+
+  <div class="tab-content active" id="tab-ficha">
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h5>Dimensiones</h5>
+        <p>Largo: 210 cm<br>Ancho: 145 cm<br>Alto cabecera: 185 cm<br>Alto piecera: 140 cm</p>
+      </div>
+      <div class="detail-card">
+        <h5>Materiales</h5>
+        <p>Estructura: bronce macizo<br>Tratamiento: bruñido original<br>Sin restauraciones con materiales ajenos</p>
+      </div>
+      <div class="detail-card">
+        <h5>Origen y época</h5>
+        <p>Fabricación inglesa<br>Período: victoriano tardío<br>Aprox. 1885–1895</p>
+      </div>
+      <div class="detail-card">
+        <h5>Estado y conservación</h5>
+        <p>Estado: excelente<br>Pátina natural acorde a la época<br>Sin abolladuras ni reparaciones visibles</p>
+      </div>
+      <div class="detail-card">
+        <h5>Desmontaje</h5>
+        <p>Desmontable en 4 piezas<br>Incluye herrajes originales<br>Instrucciones disponibles</p>
+      </div>
+      <div class="detail-card">
+        <h5>Código interno</h5>
+        <p>Ref: MP-4821<br>Ingresó: 01/2026<br>Categoría: Camas / Dormitorio</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-historia">
+    <div class="history-text">
+      <p>Esta cama proviene de una residencia privada en la provincia de Buenos Aires, donde formaba parte de un dormitorio principal decorado en estilo victoriano inglés. Fue adquirida a principios del siglo XX por una familia de inmigrantes británicos y permaneció en la misma propiedad durante más de cien años.</p>
+      <p>El dosel de cuatro postes es característico del período victoriano tardío (1880–1900), con una ornamentación floral más discreta que los estilos anteriores. El bronce macizo fue la elección predilecta de la manufactura inglesa por su durabilidad y resistencia a la corrosión.</p>
+      <p>La pieza llegó a Montepio en excelente estado de conservación, con su pátina original intacta. No se realizaron intervenciones de ningún tipo, preservando así la autenticidad que la distingue.</p>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-envio">
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h5>Retiro en local</h5>
+        <p>Retiro sin cargo en Av. Rivadavia 7701, Flores. Coordinar día y horario por WhatsApp antes de pasar.</p>
+      </div>
+      <div class="detail-card">
+        <h5>Envío a domicilio</h5>
+        <p>Disponible con flete especializado en muebles de época. Presupuesto según zona. Consultar antes de abonar.</p>
+      </div>
+      <div class="detail-card">
+        <h5>Embalaje</h5>
+        <p>La pieza se desmonta en 4 partes. El embalaje y la protección para transporte corren por cuenta del comprador o flete contratado.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RELATED PRODUCTS -->
+<div class="related-section">
+  <div class="related-inner">
+    <p class="section-label">Del mismo período</p>
+    <h2 class="section-title">También te puede interesar</h2>
+    <div class="related-grid">
+
+      <a href="producto.html" class="product-card">
+        <div class="product-img">
+          <span>🪞</span>
+          <div class="product-badge-sm">Destacado</div>
+        </div>
+        <div class="product-info-sm">
+          <span class="sub">Tocador</span>
+          <span class="name">Tocador Art Decó con espejo — nogal</span>
+          <span class="price">$380.000</span>
+        </div>
+      </a>
+
+      <a href="producto.html" class="product-card">
+        <div class="product-img">
+          <span>🗄️</span>
+          <div class="product-badge-sm rent">Alquiler</div>
+        </div>
+        <div class="product-info-sm">
+          <span class="sub">Cómoda</span>
+          <span class="name">Cómoda Luis XV — 5 cajones lacada</span>
+          <span class="price consultar">Consultar disponibilidad</span>
+        </div>
+      </a>
+
+      <a href="producto.html" class="product-card">
+        <div class="product-img">
+          <span>💡</span>
+        </div>
+        <div class="product-info-sm">
+          <span class="sub">Velador</span>
+          <span class="name">Par de veladores victoriano — bronce y cristal</span>
+          <span class="price">$125.000</span>
+        </div>
+      </a>
+
+      <a href="producto.html" class="product-card">
+        <div class="product-img">
+          <span>🧳</span>
+          <div class="product-badge-sm">Nuevo</div>
+        </div>
+        <div class="product-info-sm">
+          <span class="sub">Baúl</span>
+          <span class="name">Baúl de madera y cuero — herrajes de hierro</span>
+          <span class="price">$95.000</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-bottom">
+    <span style="color:rgba(255,255,255,0.3)">© 2026 Montepio Antigüedades.</span>
+    <div style="display:flex;gap:20px;">
+      <a href="index.html">Inicio</a>
+      <a href="categoria.html">← Volver a Dormitorio</a>
+    </div>
+  </div>
+</footer>
+
+<!-- WA FLOAT -->
+<a href="https://wa.me/5491165714568" class="wa-float" target="_blank" rel="noopener">
+  <svg width="26" height="26" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+  // ─── DEMO SWITCH ───
+  function setMode(mode) {
+    const blockVenta    = document.getElementById('blockVenta');
+    const blockAlquiler = document.getElementById('blockAlquiler');
+    const badge         = document.getElementById('badgeStatus');
+    const btns          = document.querySelectorAll('.demo-btn');
+
+    btns.forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (mode === 'venta') {
+      blockVenta.style.display    = '';
+      blockAlquiler.style.display = 'none';
+      badge.textContent = 'En venta';
+      badge.className   = 'badge-status venta';
+    } else {
+      blockVenta.style.display    = 'none';
+      blockAlquiler.style.display = '';
+      badge.textContent = 'Para alquiler';
+      badge.className   = 'badge-status alquiler';
+    }
+  }
+
+  // ─── GALLERY THUMBS ───
+  let currentThumb = 0;
+  const thumbEmojis = ['🛏️','🔍','✨','📐','🪄'];
+
+  function setThumb(idx) {
+    currentThumb = idx;
+    document.querySelectorAll('.gallery-thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+    document.getElementById('mainImg').querySelector('span').textContent = thumbEmojis[idx];
+  }
+  function changeThumb(dir) {
+    const next = (currentThumb + dir + thumbEmojis.length) % thumbEmojis.length;
+    setThumb(next);
+  }
+
+  // ─── TABS ───
+  function setTab(name, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
+

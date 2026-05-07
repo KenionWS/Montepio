@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Montepio Antigüedades — Buenos Aires</title>
+  <link rel="icon" type="image/x-icon" href="/montepio/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:      #004d33;
+      --green-dark: #003324;
+      --green-mid:  #005c3d;
+      --gold:       #c9a84c;
+      --cream:      #faf8f4;
+      --warm-white: #ffffff;
+      --gray-light: #f2efe9;
+      --gray-mid:   #9e9890;
+      --gray-dark:  #3a3630;
+      --text:       #2b2820;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ─── TOP CONTACT BAR ─── */
+    .topbar {
+      background: var(--green-dark);
+      color: rgba(255,255,255,0.75);
+      font-size: 12px;
+      letter-spacing: 0.03em;
+      padding: 8px 0;
+    }
+    .topbar .inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .topbar a { color: inherit; text-decoration: none; transition: color .2s; }
+    .topbar a:hover { color: var(--gold); }
+    .topbar .contact-group { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+    .topbar .contact-item { display: flex; align-items: center; gap: 6px; }
+    .topbar .contact-item svg { flex-shrink: 0; }
+
+    /* ─── HEADER / NAV ─── */
+    header {
+      background: var(--warm-white);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.08);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      gap: 24px;
+    }
+    .logo { text-decoration: none; flex-shrink: 0; display: flex; align-items: center; }
+    .logo-image { display: block; height: 56px; width: auto; }
+
+    .search-bar {
+      flex: 1;
+      max-width: 360px;
+      position: relative;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 9px 16px 9px 40px;
+      border: 1px solid #e0dbd2;
+      border-radius: 6px;
+      background: var(--gray-light);
+      font-size: 13px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color .2s, background .2s;
+    }
+    .search-bar input:focus { border-color: var(--green); background: white; }
+    .search-bar input::placeholder { color: var(--gray-mid); }
+    .search-bar .icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-mid);
+      pointer-events: none;
+    }
+
+    .header-cta {
+      background: var(--green);
+      color: white;
+      padding: 9px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: background .2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .header-cta:hover { background: var(--green-mid); }
+
+    /* ─── NAV CATEGORIES ─── */
+    nav {
+      background: var(--green);
+      overflow-x: visible;
+      position: relative;
+      z-index: 90;
+    }
+    nav::-webkit-scrollbar { display: none; }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      gap: 0;
+    }
+    .nav-item { position: relative; }
+    .nav-item > a, nav > .nav-inner > a {
+      color: rgba(255,255,255,0.82);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 13px 14px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color .2s, background .2s;
+      position: relative;
+    }
+    .nav-item > a::after, nav > .nav-inner > a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 14px;
+      right: 14px;
+      height: 2px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transition: transform .2s;
+    }
+    .nav-item > a:hover,
+    nav > .nav-inner > a:hover,
+    .nav-item:hover > a { color: white; background: rgba(255,255,255,0.06); }
+    .nav-item > a:hover::after,
+    nav > .nav-inner > a:hover::after,
+    .nav-item:hover > a::after { transform: scaleX(1); }
+
+    /* chevron icon en items con submenu */
+    .nav-item > a .nav-chevron {
+      width: 10px; height: 10px;
+      transition: transform .2s;
+      opacity: 0.7;
+    }
+    .nav-item:hover > a .nav-chevron { transform: rotate(180deg); opacity: 1; }
+
+    /* ─── SUBMENU ─── */
+    .submenu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      min-width: 560px;
+      background: white;
+      border-radius: 0 10px 10px 10px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.14);
+      padding: 0;
+      z-index: 200;
+      overflow: hidden;
+    }
+    .nav-item:hover .submenu { display: flex; }
+    .submenu-aside {
+      background: var(--green);
+      padding: 28px 24px;
+      min-width: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .submenu-aside h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+    .submenu-aside p {
+      font-size: 11px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .submenu-aside-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--gold);
+      color: white;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 7px 13px;
+      border-radius: 5px;
+      transition: background .2s;
+      width: fit-content;
+    }
+    .submenu-aside-link:hover { background: #b8933e; }
+    .submenu-body {
+      flex: 1;
+      padding: 20px 20px 20px 4px;
+    }
+    .submenu-body h5 {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gray-mid);
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+    .submenu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+    }
+    .submenu-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 13px;
+      border-radius: 7px;
+      transition: background .15s, color .15s;
+    }
+    .submenu-link:hover { background: var(--gray-light); color: var(--green); }
+    .submenu-link .sub-dot {
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      flex-shrink: 0;
+      opacity: 0.6;
+      transition: opacity .15s;
+    }
+    .submenu-link:hover .sub-dot { opacity: 1; }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      height: 560px;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 60%),
+        linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%);
+      z-index: 1;
+    }
+    .hero-img {
+      position: absolute;
+      inset: 0;
+      background:
+        url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1600&q=80') center/cover no-repeat;
+      /* Reemplazar con la imagen real del local */
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px 64px;
+      width: 100%;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: var(--gold);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 3px;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 5vw, 58px);
+      font-weight: 700;
+      color: white;
+      line-height: 1.1;
+      max-width: 560px;
+      margin-bottom: 16px;
+    }
+    .hero p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.82);
+      max-width: 440px;
+      margin-bottom: 28px;
+      font-weight: 300;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--gold);
+      color: white;
+      padding: 13px 28px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transition: background .2s, transform .15s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: #b8933e; transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent;
+      color: white;
+      padding: 13px 28px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1.5px solid rgba(255,255,255,0.5);
+      transition: border-color .2s, background .2s;
+      display: inline-block;
+    }
+    .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+    /* ─── SERVICES STRIP ─── */
+    .services-strip {
+      background: var(--warm-white);
+      border-bottom: 1px solid #ece7dd;
+    }
+    .services-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      divide: horizontal;
+    }
+    .service-item {
+      padding: 28px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-right: 1px solid #ece7dd;
+    }
+    .service-item:last-child { border-right: none; }
+    .service-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--green);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: white;
+    }
+    .service-item h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .service-item p {
+      font-size: 12px;
+      color: var(--gray-mid);
+    }
+
+    /* ─── SECTIONS COMMON ─── */
+    section { padding: 80px 0; }
+    .section-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 3vw, 38px);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .section-desc {
+      font-size: 15px;
+      color: var(--gray-mid);
+      max-width: 480px;
+      margin-bottom: 48px;
+    }
+
+    /* ─── CATEGORIES GRID (compact) ─── */
+    .categories-section { background: var(--cream); }
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .cat-card {
+      background: var(--warm-white);
+      border-radius: 9px;
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid #ece7dd;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 12px 14px;
+    }
+    .cat-card:hover {
+      border-color: var(--green);
+      background: #f5fbf8;
+      box-shadow: 0 2px 12px rgba(0,77,51,0.08);
+    }
+    .cat-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--gray-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+    .cat-card:hover .cat-icon { background: #d6ede4; }
+    .cat-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .cat-arrow {
+      flex-shrink: 0;
+      color: var(--gray-mid);
+      transition: color .2s, transform .2s;
+    }
+    .cat-card:hover .cat-arrow { color: var(--green); transform: translateX(2px); }
+
+    /* ─── ABOUT / LOCATION ─── */
+    .about-section { background: var(--warm-white); }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .about-image {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .about-image img {
+      width: 100%;
+      display: block;
+      border-radius: 12px;
+    }
+    .about-image-placeholder {
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: var(--gray-light);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-mid);
+      font-size: 14px;
+    }
+    .about-badge {
+      position: absolute;
+      bottom: -20px;
+      right: -20px;
+      width: 110px;
+      height: 110px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+    }
+    .about-badge .years { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; line-height: 1; }
+    .about-badge .of-exp { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.8; margin-top: 4px; }
+    .about-content .section-desc { margin-bottom: 28px; }
+    .info-list { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px; }
+    .info-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--gray-dark);
+    }
+    .info-list .dot {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .btn-green {
+      background: var(--green);
+      color: white;
+      padding: 13px 28px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background .2s;
+    }
+    .btn-green:hover { background: var(--green-mid); }
+
+    /* ─── MAP SECTION ─── */
+    .map-section { background: var(--gray-light); padding: 0; }
+    .map-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+    }
+    .map-info {
+      background: var(--green);
+      padding: 64px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 32px;
+    }
+    .map-info .section-title { color: white; margin-bottom: 0; }
+    .map-info .section-label { color: var(--gold); }
+    .map-contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      color: rgba(255,255,255,0.85);
+      font-size: 14px;
+    }
+    .map-contact-item .icon-box {
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .map-contact-item strong { display: block; color: white; font-size: 13px; margin-bottom: 2px; font-weight: 600; }
+    .map-contact-item a { color: rgba(255,255,255,0.85); text-decoration: none; }
+    .map-contact-item a:hover { color: var(--gold); }
+    .map-embed {
+      min-height: 400px;
+      background: var(--gray-mid);
+      position: relative;
+      overflow: hidden;
+    }
+    .map-embed iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ─── RESTORATION HIGHLIGHT ─── */
+    .restoration-section {
+      background: var(--green-dark);
+      padding: 80px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .restoration-section::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.03);
+    }
+    .restoration-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: center;
+    }
+    .restoration-section .section-title { color: white; }
+    .restoration-section .section-label { color: var(--gold); }
+    .restoration-section p { color: rgba(255,255,255,0.72); max-width: 540px; font-size: 15px; margin-top: 12px; }
+    .restoration-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+    .tag {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.8);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--gray-dark);
+      color: rgba(255,255,255,0.6);
+    }
+    .footer-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 64px 32px 48px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+    }
+    .footer-logo-image { display: block; height: 56px; width: auto; margin-bottom: 14px; }
+    
+    .footer-brand p {
+      font-size: 13px;
+      line-height: 1.7;
+      margin-top: 14px;
+      color: rgba(255,255,255,0.5);
+      max-width: 260px;
+    }
+    .footer-social { display: flex; gap: 10px; margin-top: 20px; }
+    .social-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      transition: border-color .2s, color .2s;
+      font-size: 14px;
+    }
+    .social-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .footer-col h5 {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: white;
+      margin-bottom: 18px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col ul li a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color .2s;
+    }
+    .footer-col ul li a:hover { color: var(--gold); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* ─── WHATSAPP FLOAT ─── */
+    .wa-float {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 999;
+      background: #25D366;
+      color: white;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+      text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .wa-float:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(37,211,102,0.5); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1024px) {
+      .categories-grid { grid-template-columns: repeat(3, 1fr); }
+      .footer-main { grid-template-columns: 1fr 1fr; gap: 40px; }
+      .services-inner { grid-template-columns: repeat(2, 1fr); }
+      .service-item:nth-child(2) { border-right: none; }
+      .service-item:nth-child(3) { border-top: 1px solid #ece7dd; }
+      .service-item:nth-child(4) { border-top: 1px solid #ece7dd; }
+    }
+    @media (max-width: 768px) {
+      .header-inner { height: 60px; }
+      .search-bar { display: none; }
+      .categories-grid { grid-template-columns: repeat(2, 1fr); }
+      .about-grid { grid-template-columns: 1fr; gap: 40px; }
+      .about-badge { bottom: 16px; right: 16px; }
+      .map-wrapper { grid-template-columns: 1fr; }
+      .restoration-inner { grid-template-columns: 1fr; }
+      .footer-main { grid-template-columns: 1fr; gap: 32px; }
+      .topbar .inner { justify-content: center; }
+      .services-inner { grid-template-columns: 1fr; }
+      .service-item { border-right: none; border-top: 1px solid #ece7dd; }
+      .service-item:first-child { border-top: none; }
+      .hero { height: 440px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="inner">
+    <div class="contact-group">
+      <a href="tel:46121221" class="contact-item">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.77 9.11 19.79 19.79 0 01.7 0.5 2 2 0 012.68 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        4612-1221 / 4612-8787
+      </a>
+      <a href="https://wa.me/5491165714568" class="contact-item">
+        <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        116571-4568
+      </a>
+    </div>
+    <div class="contact-group">
+      <span class="contact-item">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Av. Rivadavia 7701, CABA
+      </span>
+      <a href="mailto:montepioantiguedades@gmail.com" class="contact-item">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        montepioantiguedades@gmail.com
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <img src="/montepio/assets/brand/montepio-logo.jpg" alt="Montepio Antiguedades" class="logo-image" />
+    </a>
+    <div class="search-bar">
+      <svg class="icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Buscar en el catálogo..." />
+    </div>
+    <a href="https://wa.me/5491165714568" class="header-cta">
+      <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Consultanos
+    </a>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+
+    <!-- Dormitorio con submenu -->
+    <div class="nav-item">
+      <a href="categoria.html">
+        Dormitorio
+        <svg class="nav-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </a>
+      <div class="submenu">
+        <div class="submenu-aside">
+          <div>
+            <h4>Dormitorio</h4>
+            <p>Camas, cómodas, armarios y todo para el cuarto.</p>
+          </div>
+          <a href="categoria.html" class="submenu-aside-link">
+            Ver todo
+            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="submenu-body">
+          <h5>Subcategorías</h5>
+          <div class="submenu-grid">
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Camas y sommiers</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Mesas de luz</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Cómodas</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Armarios y roperos</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Tocadores</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Veladores</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Cabeceras</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Baúles y arcones</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Biombos</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Percheros</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comedor con submenu -->
+    <div class="nav-item">
+      <a href="#">
+        Comedor
+        <svg class="nav-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </a>
+      <div class="submenu">
+        <div class="submenu-aside">
+          <div>
+            <h4>Comedor</h4>
+            <p>Mesas, sillas, aparadores y vitrinas de época.</p>
+          </div>
+          <a href="#" class="submenu-aside-link">
+            Ver todo
+            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="submenu-body">
+          <h5>Subcategorías</h5>
+          <div class="submenu-grid">
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Mesas de comedor</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Sillas de comedor</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Aparadores</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Vitrinas</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Buffets</a>
+            <a href="#" class="submenu-link"><span class="sub-dot"></span>Juegos completos</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a href="#">Escritorio</a>
+    <a href="#">Living</a>
+    <a href="#">Iluminación</a>
+    <a href="#">Juegos · Deportes</a>
+    <a href="#">Decoración</a>
+    <a href="#">Exterior</a>
+    <a href="#">Mid Century</a>
+    <a href="#">Restauraciones</a>
+    <a href="#">Compra Online</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-img"></div>
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Casa Montepio · CABA</div>
+    <h1>Antigüedades con historia y estilo</h1>
+    <p>Compra, venta y restauración de muebles y objetos únicos. Más de 40 años en Buenos Aires.</p>
+    <div class="hero-actions">
+      <a href="#categorias" class="btn-primary">Ver catálogo</a>
+      <a href="#ubicacion" class="btn-outline">Cómo llegar</a>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES STRIP -->
+<div class="services-strip">
+  <div class="services-inner">
+    <div class="service-item">
+      <div class="service-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div>
+        <h4>Compra y venta</h4>
+        <p>Tasación sin cargo</p>
+      </div>
+    </div>
+    <div class="service-item">
+      <div class="service-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <div>
+        <h4>Restauraciones</h4>
+        <p>Lustre · Retapizados · Esterillados</p>
+      </div>
+    </div>
+    <div class="service-item">
+      <div class="service-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <div>
+        <h4>Compra online</h4>
+        <p>MercadoShops · Envíos</p>
+      </div>
+    </div>
+    <div class="service-item">
+      <div class="service-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div>
+        <h4>Alquileres</h4>
+        <p>Para producción y eventos</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<section class="categories-section" id="categorias">
+  <div class="section-inner">
+    <p class="section-label">Explorá el stock</p>
+    <h2 class="section-title">Categorías</h2>
+    <p class="section-desc">Cada pieza es única. Encontrá muebles, objetos de decoración y arte para cada ambiente.</p>
+    <div class="categories-grid">
+
+      <a href="categoria.html" class="cat-card">
+        <div class="cat-icon">🛏️</div>
+        <span class="cat-name">Dormitorio</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🍽️</div>
+        <span class="cat-name">Comedor</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🖊️</div>
+        <span class="cat-name">Escritorio</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🛋️</div>
+        <span class="cat-name">Living</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🪑</div>
+        <span class="cat-name">Sillones</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🪞</div>
+        <span class="cat-name">Espejos</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">💡</div>
+        <span class="cat-name">Iluminación</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🗿</div>
+        <span class="cat-name">Estatuas</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">✂️</div>
+        <span class="cat-name">Art. Barbería</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">📌</div>
+        <span class="cat-name">Carteles</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🌿</div>
+        <span class="cat-name">Exterior</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🎨</div>
+        <span class="cat-name">Decoración</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🎯</div>
+        <span class="cat-name">Juegos · Deportes</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🕰️</div>
+        <span class="cat-name">Mid Century</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🖼️</div>
+        <span class="cat-name">Cuadros y Arte</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <a href="#" class="cat-card">
+        <div class="cat-icon">🔧</div>
+        <span class="cat-name">Oficios y Herrería</span>
+        <svg class="cat-arrow" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- RESTORATION HIGHLIGHT -->
+<section class="restoration-section">
+  <div class="restoration-inner">
+    <div>
+      <p class="section-label">Servicio especializado</p>
+      <h2 class="section-title">Restauraciones a medida</h2>
+      <p>Devolvemos la vida a tus muebles con técnicas tradicionales y materiales de primera calidad. Presupuesto sin cargo.</p>
+      <div class="restoration-tags">
+        <span class="tag">Lustre</span>
+        <span class="tag">Retapizados</span>
+        <span class="tag">Esterillados</span>
+        <span class="tag">Arreglos en general</span>
+        <span class="tag">Dorado</span>
+      </div>
+    </div>
+    <a href="https://wa.me/5491165714568?text=Hola,%20quiero%20consultar%20por%20una%20restauración" class="btn-primary" style="white-space:nowrap; align-self:center;">
+      Pedir presupuesto
+    </a>
+  </div>
+</section>
+
+<!-- ABOUT / NOSOTROS -->
+<section class="about-section" id="nosotros">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div style="position:relative;">
+        <div class="about-image-placeholder">
+          <!-- Reemplazar con imagen del local: <img src="local.jpg" alt="Local Montepio"> -->
+          Foto del local / fachada
+        </div>
+        <div class="about-badge">
+          <span class="years">40+</span>
+          <span class="of-exp">años de<br>historia</span>
+        </div>
+      </div>
+      <div class="about-content">
+        <p class="section-label">Quiénes somos</p>
+        <h2 class="section-title">Una casa con historia en Buenos Aires</h2>
+        <p class="section-desc">
+          Desde 1985 nos especializamos en la compra, venta y restauración de antigüedades y muebles únicos en el corazón de Flores, CABA.
+        </p>
+        <ul class="info-list">
+          <li><span class="dot"></span>Más de 40 años en el rubro</li>
+          <li><span class="dot"></span>Tasación de piezas sin cargo</li>
+          <li><span class="dot"></span>Taller propio de restauración</li>
+          <li><span class="dot"></span>Alquiler para filmaciones y eventos</li>
+          <li><span class="dot"></span>Ventas presenciales y por MercadoShops</li>
+        </ul>
+        <a href="https://wa.me/5491165714568" class="btn-green">
+          <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Contactanos
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP / UBICACION -->
+<div class="map-section" id="ubicacion">
+  <div class="map-wrapper">
+    <div class="map-info">
+      <div>
+        <p class="section-label">Visitanos</p>
+        <h2 class="section-title">Dónde estamos</h2>
+      </div>
+      <div class="map-contact-item">
+        <div class="icon-box">
+          <svg width="18" height="18" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div>
+          <strong>Dirección</strong>
+          Av. Rivadavia 7701, Flores<br>Ciudad de Buenos Aires
+        </div>
+      </div>
+      <div class="map-contact-item">
+        <div class="icon-box">
+          <svg width="18" height="18" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.77 9.11 19.79 19.79 0 01.7 0.5 2 2 0 012.68 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        </div>
+        <div>
+          <strong>Teléfonos</strong>
+          <a href="tel:46121221">4612-1221</a> / <a href="tel:46128787">4612-8787</a>
+        </div>
+      </div>
+      <div class="map-contact-item">
+        <div class="icon-box">
+          <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </div>
+        <div>
+          <strong>WhatsApp</strong>
+          <a href="https://wa.me/5491165714568">116571-4568</a>
+        </div>
+      </div>
+      <div class="map-contact-item">
+        <div class="icon-box">
+          <svg width="18" height="18" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div>
+          <strong>Email</strong>
+          <a href="mailto:montepioantiguedades@gmail.com">montepioantiguedades@gmail.com</a>
+        </div>
+      </div>
+    </div>
+    <div class="map-embed">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.4!2d-58.4736!3d-34.6282!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bcc9c4a7b3e0ab%3A0x1!2sAv.+Rivadavia+7701%2C+Buenos+Aires!5e0!3m2!1ses!2sar!4v1"
+        width="100%"
+        height="400"
+        style="border:0;"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Montepio Antigüedades - Ubicación">
+      </iframe>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-main">
+    <div class="footer-brand">
+      <img src="/montepio/assets/brand/montepio-logo.jpg" alt="Montepio Antiguedades" class="footer-logo-image" />
+      <p>Especialistas en compra, venta y restauración de antigüedades. Av. Rivadavia 7701, Flores, CABA.</p>
+      <div class="footer-social">
+        <a href="#" class="social-btn" title="Facebook">f</a>
+        <a href="#" class="social-btn" title="Instagram">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>Categorías</h5>
+      <ul>
+        <li><a href="#">Dormitorio</a></li>
+        <li><a href="#">Comedor</a></li>
+        <li><a href="#">Living</a></li>
+        <li><a href="#">Iluminación</a></li>
+        <li><a href="#">Decoración</a></li>
+        <li><a href="#">Mid Century</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Servicios</h5>
+      <ul>
+        <li><a href="#">Compra y venta</a></li>
+        <li><a href="#">Restauraciones</a></li>
+        <li><a href="#">Alquileres</a></li>
+        <li><a href="#">Compra online</a></li>
+        <li><a href="#">MercadoShops</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Información</h5>
+      <ul>
+        <li><a href="#">Historia de Montepio</a></li>
+        <li><a href="#">Cómo llegar</a></li>
+        <li><a href="#">Contacto</a></li>
+        <li><a href="https://wa.me/5491165714568">WhatsApp</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Montepio Antigüedades. Todos los derechos reservados.</span>
+    <span>Av. Rivadavia 7701, Flores, CABA</span>
+  </div>
+</footer>
+
+<!-- WHATSAPP FLOAT -->
+<a href="https://wa.me/5491165714568?text=Hola,%20vi%20su%20web%20y%20quiero%20consultar" class="wa-float" title="Escribinos por WhatsApp" target="_blank" rel="noopener">
+  <svg width="26" height="26" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+</body>
+</html>
+
+

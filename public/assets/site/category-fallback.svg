@@ -1,0 +1,24 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="900" fill="#EFE6D8"/>
+  <rect y="560" width="1200" height="340" fill="#D7C2A7"/>
+  <circle cx="1030" cy="180" r="130" fill="#E4D4BE"/>
+  <circle cx="945" cy="235" r="58" fill="#F6EEE4"/>
+  <path d="M178 654C178 614.236 210.236 582 250 582H950C989.764 582 1022 614.236 1022 654V686C1022 725.764 989.764 758 950 758H250C210.236 758 178 725.764 178 686V654Z" fill="#B9936B"/>
+  <path d="M262 314C262 277.549 291.549 248 328 248H872C908.451 248 938 277.549 938 314V582H262V314Z" fill="#A97D4F"/>
+  <path d="M312 322C312 301.013 329.013 284 350 284H850C870.987 284 888 301.013 888 322V582H312V322Z" fill="#7A5534"/>
+  <rect x="360" y="332" width="160" height="204" rx="10" fill="#E7D7C3"/>
+  <rect x="540" y="332" width="120" height="204" rx="10" fill="#D3B897"/>
+  <rect x="680" y="332" width="160" height="204" rx="10" fill="#E7D7C3"/>
+  <path d="M420 582H472V770H420V582Z" fill="#6C492C"/>
+  <path d="M728 582H780V770H728V582Z" fill="#6C492C"/>
+  <path d="M210 760C210 739.013 227.013 722 248 722H952C972.987 722 990 739.013 990 760V782H210V760Z" fill="#6C492C"/>
+  <path d="M170 782H1030V814C1030 827.255 1019.25 838 1006 838H194C180.745 838 170 827.255 170 814V782Z" fill="#543721"/>
+  <path d="M154 210C154 180.177 178.177 156 208 156H502C531.823 156 556 180.177 556 210V224H154V210Z" fill="#DCC8AF"/>
+  <path d="M184 224H526V462H184V224Z" fill="#F7F1E8"/>
+  <path d="M716 176C716 154.461 733.461 137 755 137H920C941.539 137 959 154.461 959 176V198H716V176Z" fill="#DCC8AF"/>
+  <path d="M740 198H935V384H740V198Z" fill="#F7F1E8"/>
+  <path d="M188 442H522" stroke="#D2B694" stroke-width="14" stroke-linecap="round"/>
+  <path d="M746 360H926" stroke="#D2B694" stroke-width="12" stroke-linecap="round"/>
+  <path d="M96 828C231.33 776 413.022 748 603 748C792.978 748 974.67 776 1110 828" stroke="#F7F1E8" stroke-width="18" stroke-linecap="round" opacity="0.65"/>
+  <text x="600" y="116" text-anchor="middle" fill="#35553E" font-size="48" font-family="Georgia, serif" letter-spacing="8">MONTEPIO</text>
+</svg>

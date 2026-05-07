@@ -1,0 +1,6 @@
+# Bloquea ejecución de PHP en uploads
+<FilesMatch "\.php\d?$">
+    Require all denied
+</FilesMatch>
+Options -ExecCGI -Indexes
+AddType text/plain .php .php5 .phtml
