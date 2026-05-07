@@ -987,3 +987,12 @@ img {
   }
 
 }
+
+.site-footer-credit{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+  .site-footer-credit img{
+    height: 20px;
+  }
