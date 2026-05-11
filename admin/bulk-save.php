@@ -55,7 +55,21 @@ try {
         $rentalOnly = !empty($item['rental_only']) ? 1 : 0;
         $type       = $rentalOnly ? 'alquiler' : 'venta';
         $status     = 'activo';
-        $categoryId = (int)($item['category_id'] ?? 0) ?: null;
+        $categoryIds = [];
+        foreach ((array)($item['category_ids'] ?? []) as $categoryIdRaw) {
+            $categoryId = (int)$categoryIdRaw;
+            if ($categoryId > 0) {
+                $categoryIds[] = $categoryId;
+            }
+        }
+        if (!$categoryIds) {
+            $fallbackCategoryId = (int)($item['category_id'] ?? 0);
+            if ($fallbackCategoryId > 0) {
+                $categoryIds[] = $fallbackCategoryId;
+            }
+        }
+        $categoryIds = array_values(array_unique($categoryIds));
+        $categoryId = $categoryIds[0] ?? null;
         $price      = $rentalOnly ? null : (strlen((string)($item['price'] ?? '')) ? (float)$item['price'] : null);
         $priceVis   = !$rentalOnly && $price !== null ? 1 : 0;
         $sku        = sku_generate();
@@ -70,9 +84,11 @@ try {
         $ins->execute([$title, $slug, $sku, $categoryId, $type, $price, $priceVis, $status, $rentalOnly, $now, $now]);
         $productId = (int)$db->lastInsertId();
 
-        if ($categoryId !== null) {
+        if ($categoryIds) {
             $pivot = $db->prepare("INSERT OR IGNORE INTO product_categories (product_id, category_id) VALUES (?, ?)");
-            $pivot->execute([$productId, $categoryId]);
+            foreach ($categoryIds as $cid) {
+                $pivot->execute([$productId, $cid]);
+            }
         }
 
         // Mover imagen de temp → uploads/products/{id}/

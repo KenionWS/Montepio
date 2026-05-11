@@ -10,6 +10,13 @@ require_once __DIR__ . '/lib/layout.php';
 auth_require();
 
 $categories = db()->query("SELECT * FROM categories ORDER BY parent_id NULLS FIRST, position, name")->fetchAll();
+$catParents = array_filter($categories, fn($c) => $c['parent_id'] === null);
+$catChildren = [];
+foreach ($categories as $c) {
+    if ($c['parent_id'] !== null) {
+        $catChildren[$c['parent_id']][] = $c;
+    }
+}
 
 layout_head('Carga masiva', <<<CSS
 <style>
@@ -173,6 +180,53 @@ layout_head('Carga masiva', <<<CSS
 .defaults-bar select,
 .defaults-bar input { width: 180px; font-size: 12px; padding: 7px 10px; }
 .defaults-bar .wide-input { width: 240px; }
+.bulk-category-field { width: min(100%, 420px); flex: 1 1 340px; }
+.bulk-category-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.bulk-category-count { font-size: 11px; color: var(--gray-m); font-weight: 500; }
+.bulk-category-picker {
+  border: 1px solid #d8d2c9;
+  border-radius: 8px;
+  background: var(--gray-l);
+  padding: 8px 10px;
+  max-height: 210px;
+  overflow-y: auto;
+}
+.bulk-category-empty { font-size: 12px; color: var(--gray-m); padding: 8px 2px; }
+.bulk-category-group { border-bottom: 1px solid #ece7dd; padding: 5px 0; }
+.bulk-category-group:last-child { border-bottom: none; }
+.bulk-category-row { display: flex; align-items: center; gap: 8px; min-height: 28px; }
+.bulk-category-toggle {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--gray-d);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.bulk-category-toggle[aria-expanded="true"] { color: var(--green); }
+.bulk-category-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
+.bulk-category-toggle svg { transition: transform .2s ease; }
+.bulk-category-spacer { width: 18px; flex-shrink: 0; }
+.bulk-category-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text);
+  flex: 1;
+}
+.bulk-category-label.is-parent { font-weight: 600; }
+.bulk-category-label input { width: auto; margin: 0; accent-color: var(--green); }
+.bulk-category-label small { color: var(--gray-m); font-weight: 400; }
+.bulk-category-children { display: none; padding: 4px 0 4px 34px; }
+.bulk-category-children.is-open { display: block; }
+.bulk-category-children .bulk-category-label { padding: 4px 0; color: var(--gray-d); }
 
 #resultToast {
   display: none;
@@ -202,14 +256,49 @@ layout_sidebar('carga-masiva.php');
 <div class="content">
 
 <div class="defaults-bar">
-  <div>
-    <label>Destino de carga</label>
-    <select id="defCategory">
-      <option value="">Elegi una categoria o subcategoria</option>
-      <?php foreach ($categories as $c): ?>
-        <option value="<?= $c['id'] ?>"><?= h($c['name']) ?></option>
-      <?php endforeach; ?>
-    </select>
+  <div class="bulk-category-field">
+    <div class="bulk-category-head">
+      <label>Destino de carga</label>
+      <span class="bulk-category-count" id="categoryCount">Sin categorias elegidas</span>
+    </div>
+    <div class="bulk-category-picker" id="bulkCategoryPicker">
+      <?php if (empty($catParents)): ?>
+        <div class="bulk-category-empty">No hay categorias cargadas.</div>
+      <?php else: ?>
+        <?php foreach ($catParents as $parent): ?>
+          <?php $children = $catChildren[$parent['id']] ?? []; ?>
+          <div class="bulk-category-group">
+            <div class="bulk-category-row">
+              <?php if (!empty($children)): ?>
+                <button type="button"
+                        class="bulk-category-toggle"
+                        data-category-toggle
+                        aria-expanded="false"
+                        aria-controls="bulk-category-children-<?= $parent['id'] ?>">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"></path></svg>
+                </button>
+              <?php else: ?>
+                <span class="bulk-category-spacer"></span>
+              <?php endif; ?>
+              <label class="bulk-category-label is-parent">
+                <input type="checkbox" class="bulk-category-checkbox" value="<?= $parent['id'] ?>">
+                <?= h($parent['name']) ?> <small>categoria principal</small>
+              </label>
+            </div>
+            <?php if (!empty($children)): ?>
+              <div id="bulk-category-children-<?= $parent['id'] ?>" class="bulk-category-children">
+                <?php foreach ($children as $child): ?>
+                  <label class="bulk-category-label">
+                    <input type="checkbox" class="bulk-category-checkbox" value="<?= $child['id'] ?>">
+                    <?= h($child['name']) ?> <small>subcategoria</small>
+                  </label>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    </div>
   </div>
   <div>
     <label>Nombre base</label>
@@ -270,6 +359,7 @@ let gpDone = 0;
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
+const categoryCheckboxes = Array.from(document.querySelectorAll('.bulk-category-checkbox'));
 
 dropZone.addEventListener('dragover', (e) => {
   e.preventDefault();
@@ -289,16 +379,31 @@ fileInput.addEventListener('change', () => {
   fileInput.value = '';
 });
 
-document.getElementById('defCategory').addEventListener('change', applyDefaults);
+categoryCheckboxes.forEach((checkbox) => checkbox.addEventListener('change', () => {
+  updateCategoryCount();
+  applyDefaults();
+}));
 document.getElementById('bulkBaseName').addEventListener('input', applyDefaults);
 document.getElementById('defRentalOnly').addEventListener('change', applyDefaults);
+document.querySelectorAll('[data-category-toggle]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const targetId = button.getAttribute('aria-controls');
+    const target = targetId ? document.getElementById(targetId) : null;
+    if (!target) return;
+
+    const expanded = button.getAttribute('aria-expanded') === 'true';
+    button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+    target.classList.toggle('is-open', !expanded);
+  });
+});
+updateCategoryCount();
 
 function handleFiles(files) {
   const imgs = files.filter((file) => file.type.startsWith('image/'));
   if (!imgs.length) return;
 
-  if (!document.getElementById('defCategory').value) {
-    showToast('Elegi primero la categoria o subcategoria donde queres cargar las fotos', true);
+  if (!getSelectedCategoryIds().length) {
+    showToast('Elegi primero las categorias o subcategorias donde queres cargar las fotos', true);
     return;
   }
 
@@ -415,13 +520,13 @@ function applyDefaults() {
 }
 
 function applyDefaultsToCard(card) {
-  const categoryId = document.getElementById('defCategory').value;
+  const categoryIds = getSelectedCategoryIds();
   const baseName = document.getElementById('bulkBaseName').value.trim();
   const rentalOnly = document.getElementById('defRentalOnly').checked;
 
   const destination = card.querySelector('.prod-destination');
   if (destination) {
-    destination.textContent = categoryId ? (CATEGORIES[categoryId] || 'Sin categoria') : 'Sin categoria';
+    destination.textContent = formatCategorySelection(categoryIds);
   }
 
   const rentalOnlyInput = card.querySelector('.prod-rental-only');
@@ -434,6 +539,33 @@ function applyDefaultsToCard(card) {
   if (baseName && nameInput && !nameInput.dataset.edited) {
     nameInput.value = baseName;
   }
+}
+
+function getSelectedCategoryIds() {
+  return categoryCheckboxes
+    .filter((checkbox) => checkbox.checked)
+    .map((checkbox) => checkbox.value);
+}
+
+function formatCategorySelection(categoryIds) {
+  if (!categoryIds.length) return 'Sin categoria';
+
+  const names = categoryIds
+    .map((id) => CATEGORIES[id])
+    .filter(Boolean);
+
+  if (names.length <= 2) return names.join(', ');
+  return names.slice(0, 2).join(', ') + ' +' + (names.length - 2);
+}
+
+function updateCategoryCount() {
+  const count = getSelectedCategoryIds().length;
+  const label = document.getElementById('categoryCount');
+  if (!label) return;
+
+  label.textContent = count
+    ? count + ' categoria' + (count !== 1 ? 's' : '') + ' elegida' + (count !== 1 ? 's' : '')
+    : 'Sin categorias elegidas';
 }
 
 function syncCardMode(card) {
@@ -510,9 +642,9 @@ function clearAll() {
 }
 
 async function saveAll() {
-  const categoryId = document.getElementById('defCategory').value;
-  if (!categoryId) {
-    showToast('Elegi el destino antes de guardar', true);
+  const categoryIds = getSelectedCategoryIds();
+  if (!categoryIds.length) {
+    showToast('Elegi al menos una categoria o subcategoria antes de guardar', true);
     return;
   }
 
@@ -549,7 +681,8 @@ async function saveAll() {
     return {
       token: current.token,
       title: el.querySelector('.prod-name').value.trim(),
-      category_id: categoryId,
+      category_id: categoryIds[0] || null,
+      category_ids: categoryIds,
       rental_only: rentalOnly ? 1 : 0,
       type: rentalOnly ? 'alquiler' : 'venta',
       price: rentalOnly ? null : (el.querySelector('.prod-price').value || null),
