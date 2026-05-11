@@ -108,13 +108,12 @@ class SiteCatalog
                       AND (
                         px.title LIKE ?
                         OR COALESCE(px.description, '') LIKE ?
-                        OR COALESCE(px.sku, '') LIKE ?
                       )
                 )
             )
             ";
             $like = '%' . $search . '%';
-            $categoryParams = [$like, $like, $like, $like, $like];
+            $categoryParams = [$like, $like, $like, $like];
         }
 
         $categorySql .= "
@@ -138,11 +137,10 @@ class SiteCatalog
                   AND (
                     p.title LIKE ?
                     OR COALESCE(p.description, '') LIKE ?
-                    OR COALESCE(p.sku, '') LIKE ?
                     OR COALESCE(c.name, '') LIKE ?
                   )" : '') . "
                 ORDER BY p.is_featured DESC, p.created_at DESC, p.id DESC
-            ", $search !== '' ? array_fill(0, 4, '%' . $search . '%') : []),
+            ", $search !== '' ? array_fill(0, 3, '%' . $search . '%') : []),
             'searchQuery' => $search,
         ];
     }
@@ -257,7 +255,6 @@ class SiteCatalog
                 p.status,
                 p.is_featured,
                 p.created_at,
-                p.sku,
                 p.style,
                 p.era,
                 p.material,
@@ -500,7 +497,6 @@ class SiteCatalog
             'id' => (int)$product['id'],
             'title' => $product['title'],
             'slug' => $product['slug'],
-            'sku' => trim((string)($product['sku'] ?? '')),
             'type' => $product['type'],
             'rental_only' => $rentalOnly,
             'status' => $product['status'],

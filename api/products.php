@@ -55,7 +55,7 @@ try {
     // Productos
     $stmt = $db->prepare("
         SELECT
-            p.id, p.sku, p.title, p.slug, p.description,
+            p.id, p.title, p.slug, p.description,
             p.type, p.price, p.price_visible, p.status, p.is_featured,
             p.style, p.era, p.material, p.origin, p.dimensions, p.condition_val,
             p.created_at,
@@ -96,7 +96,6 @@ try {
             $cover = $imgs[0] ?? null; // primer resultado = portada (por ORDER BY)
             return [
                 'id'            => (int)$p['id'],
-                'sku'           => $p['sku'],
                 'title'         => $p['title'],
                 'slug'          => $p['slug'],
                 'description'   => $p['description'],

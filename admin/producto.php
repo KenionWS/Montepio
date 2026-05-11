@@ -98,10 +98,6 @@ layout_sidebar($isEdit ? '' : 'producto.php');
                 <input type="text" name="title" value="<?= h($p['title'] ?? '') ?>" required placeholder="Ej: Aparador de roble con marmol">
                 <span class="form-hint">Es el nombre principal que se muestra en el sitio.</span>
               </div>
-              <div class="form-group">
-                <label>SKU / Codigo</label>
-                <input type="text" name="sku" value="<?= h($p['sku'] ?? '') ?>" placeholder="Opcional">
-              </div>
               <div class="form-group form-full">
                 <label>Categorias</label>
                 <div class="category-picker">

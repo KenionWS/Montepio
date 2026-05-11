@@ -47,7 +47,7 @@
                             {{ $searchQuery !== '' ? 'Resultados para "' . e($searchQuery) . '"' : 'Productos publicados desde el back office' }}
                         </h2>
                         <p class="toolbar-copy">
-                            {{ $searchQuery !== '' ? 'Se filtran productos y categorias por nombre, descripcion, SKU y categoria.' : 'Se muestran primero los destacados y luego el resto de las piezas activas, usando imagen real cuando existe y un bloque de respaldo cuando no hay foto.' }}
+                            {{ $searchQuery !== '' ? 'Se filtran productos y categorias por nombre, descripcion y categoria.' : 'Se muestran primero los destacados y luego el resto de las piezas activas, usando imagen real cuando existe y un bloque de respaldo cuando no hay foto.' }}
                         </p>
                     </div>
                     <strong class="count">{{ count($products) }} producto(s)</strong>

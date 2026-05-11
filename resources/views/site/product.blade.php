@@ -19,11 +19,10 @@
     $footerBackUrl = $topBadgeUrl;
     $footerBackLabel = 'Volver a la categoria';
     $whatsAppNumber = '5491165714568';
-    $skuSnippet = trim((string) $product['sku']) !== '' ? ' (' . $product['sku'] . ')' : '';
-    $consultMessage = rawurlencode('Hola! Quiero consultar por la pieza "' . $product['title'] . '"' . $skuSnippet . '.');
-    $saleMessage = rawurlencode('Hola! Vi la pieza "' . $product['title'] . '"' . $skuSnippet . ' y me interesa conocer disponibilidad de venta.');
-    $rentMessage = rawurlencode('Hola! Vi la pieza "' . $product['title'] . '"' . $skuSnippet . ' y me interesa conocer disponibilidad de alquiler.');
-    $generalMessage = rawurlencode('Hola! Quiero hacer una consulta general por la pieza "' . $product['title'] . '"' . $skuSnippet . '.');
+    $consultMessage = rawurlencode('Hola! Quiero consultar por la pieza "' . $product['title'] . '".');
+    $saleMessage = rawurlencode('Hola! Vi la pieza "' . $product['title'] . '" y me interesa conocer disponibilidad de venta.');
+    $rentMessage = rawurlencode('Hola! Vi la pieza "' . $product['title'] . '" y me interesa conocer disponibilidad de alquiler.');
+    $generalMessage = rawurlencode('Hola! Quiero hacer una consulta general por la pieza "' . $product['title'] . '".');
     $floatingWhatsappUrl = 'https://wa.me/' . $whatsAppNumber . '?text=' . $consultMessage;
 
     $styleBits = array_values(array_filter([
@@ -38,7 +37,6 @@
         $product['dimensions'] ? ['Dimensiones', $product['dimensions']] : null,
         $product['condition'] ? ['Estado', $product['condition']] : null,
         $product['origin'] ? ['Origen', $product['origin']] : null,
-        $product['sku'] ? ['Codigo', $product['sku']] : null,
     ]));
 
     $detailCards = array_values(array_filter([

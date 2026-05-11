@@ -80,7 +80,7 @@ layout_sidebar('dashboard.php');
   <form method="GET" style="padding:14px 20px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
     <div style="flex:2;min-width:180px;">
       <label style="margin-bottom:4px;display:block;">Buscar</label>
-      <input type="text" name="q" value="<?= h($search) ?>" placeholder="Nombre o codigo SKU...">
+      <input type="text" name="q" value="<?= h($search) ?>" placeholder="Nombre del producto...">
     </div>
     <div style="flex:1;min-width:140px;">
       <label style="margin-bottom:4px;display:block;">Categoria</label>

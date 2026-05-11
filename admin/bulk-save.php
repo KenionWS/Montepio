@@ -72,16 +72,15 @@ try {
         $categoryId = $categoryIds[0] ?? null;
         $price      = $rentalOnly ? null : (strlen((string)($item['price'] ?? '')) ? (float)$item['price'] : null);
         $priceVis   = !$rentalOnly && $price !== null ? 1 : 0;
-        $sku        = sku_generate();
         $slug       = unique_slug($title);
 
         // Insertar producto
         $ins = $db->prepare("
             INSERT INTO products
-              (title, slug, sku, category_id, type, price, price_visible, status, rental_only, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              (title, slug, category_id, type, price, price_visible, status, rental_only, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $ins->execute([$title, $slug, $sku, $categoryId, $type, $price, $priceVis, $status, $rentalOnly, $now, $now]);
+        $ins->execute([$title, $slug, $categoryId, $type, $price, $priceVis, $status, $rentalOnly, $now, $now]);
         $productId = (int)$db->lastInsertId();
 
         if ($categoryIds) {

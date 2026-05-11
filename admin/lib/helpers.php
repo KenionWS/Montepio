@@ -36,17 +36,6 @@ function unique_slug(string $base, int $excludeId = 0, string $table = 'products
     return $s;
 }
 
-function sku_generate(): string
-{
-    $last = db()->query("SELECT sku FROM products ORDER BY id DESC LIMIT 1")->fetchColumn();
-    if ($last && preg_match('/(\d+)$/', $last, $m)) {
-        $next = (int)$m[1] + 1;
-    } else {
-        $next = 1;
-    }
-    return 'MON-' . str_pad((string)$next, 4, '0', STR_PAD_LEFT);
-}
-
 // ─── HTTP / JSON ──────────────────────────────────────────────────────────────
 function json_ok(array $data = []): never
 {

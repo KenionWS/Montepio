@@ -67,7 +67,6 @@ $id  = (int)($_POST['id'] ?? 0);
 $imageWarnings = [];
 
 $title       = trim($_POST['title'] ?? '');
-$sku         = trim($_POST['sku']   ?? '');
 $description = trim($_POST['description'] ?? '');
 $history     = trim($_POST['history']     ?? '');
 $categoryIds = array_filter(array_map('intval', (array)($_POST['category_ids'] ?? [])));
@@ -103,7 +102,6 @@ if (!$title) {
 }
 
 $slug = unique_slug($title, $id);
-$sku = $sku !== '' ? $sku : null;
 
 $now = date('Y-m-d H:i:s');
 
@@ -111,14 +109,14 @@ if ($id) {
     // UPDATE
     $stmt = $db->prepare("
         UPDATE products SET
-          title=?,slug=?,sku=?,description=?,history=?,category_id=?,
+          title=?,slug=?,description=?,history=?,category_id=?,
           type=?,price=?,price_visible=?,status=?,is_featured=?,
           rental_only=?,style=?,era=?,material=?,origin=?,dimensions=?,condition_val=?,
           pickup_available=?,shipping_transport=?,shipping_flete=?,shipping_encomienda=?,
           updated_at=?
         WHERE id=?
     ");
-    $stmt->execute([$title,$slug,$sku,$description,$history,$categoryId,
+    $stmt->execute([$title,$slug,$description,$history,$categoryId,
                     $type,$price,$priceVis,$status,$isFeatured,
                     $rentalOnly,$style,$era,$material,$origin,$dimensions,$condition,
                     $pickupAvailable,$shippingTransport,$shippingFlete,$shippingEncomienda,
@@ -127,14 +125,14 @@ if ($id) {
     // INSERT
     $stmt = $db->prepare("
         INSERT INTO products
-          (title,slug,sku,description,history,category_id,
+          (title,slug,description,history,category_id,
            type,price,price_visible,status,is_featured,
            rental_only,style,era,material,origin,dimensions,condition_val,
            pickup_available,shipping_transport,shipping_flete,shipping_encomienda,
            created_at,updated_at)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ");
-    $stmt->execute([$title,$slug,$sku,$description,$history,$categoryId,
+    $stmt->execute([$title,$slug,$description,$history,$categoryId,
                     $type,$price,$priceVis,$status,$isFeatured,
                     $rentalOnly,$style,$era,$material,$origin,$dimensions,$condition,
                     $pickupAvailable,$shippingTransport,$shippingFlete,$shippingEncomienda,

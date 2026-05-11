@@ -64,7 +64,6 @@
             <table>
                 <thead>
                     <tr>
-                        <th>SKU</th>
                         <th>Titulo</th>
                         <th>Categoria</th>
                         <th>Venta</th>
@@ -74,9 +73,9 @@
                 </thead>
                 <tbody>
                     @foreach ([
-                        ['MON-0001', 'Biblioteca francesa', 'Comedor', 'Si', '$ 1.250.000', 'Si'],
-                        ['MON-0002', 'Arana de cristal', 'Iluminacion', 'No', '-', 'Si'],
-                        ['MON-0003', 'Par de sillas', 'Living', 'Si', '$ 780.000', 'No'],
+                        ['Biblioteca francesa', 'Comedor', 'Si', '$ 1.250.000', 'Si'],
+                        ['Arana de cristal', 'Iluminacion', 'No', '-', 'Si'],
+                        ['Par de sillas', 'Living', 'Si', '$ 780.000', 'No'],
                     ] as $row)
                         <tr>
                             @foreach ($row as $value)
