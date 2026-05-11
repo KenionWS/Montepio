@@ -174,13 +174,16 @@ img {
   font-weight: 500;
   white-space: nowrap;
   transition: background .2s;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-cta:hover {
   background: var(--green-mid);
 }
 
-.header-cta-icon,
 .mobile-search-checkbox,
 .mobile-search-button {
   display: none;
