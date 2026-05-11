@@ -349,6 +349,18 @@ class SiteCatalog
         ];
     }
 
+    public static function aboutViewData(): array
+    {
+        return [
+            'baseUrl' => self::baseUrl(),
+            'defaultCategoryIcon' => self::DEFAULT_CATEGORY_ICON,
+            'defaultProductIcon' => self::DEFAULT_PRODUCT_ICON,
+            'navCategories' => self::fetchCategoryTree(),
+            'sitePopup' => self::fetchSitePopup(),
+            'aboutPage' => self::fetchAboutPage(),
+        ];
+    }
+
     private static function fetchProducts(string $suffixSql, array $params = []): array
     {
         $db = self::db();
@@ -767,6 +779,31 @@ class SiteCatalog
             'cta_text' => $ctaText,
             'cta_link' => $ctaLink,
             'version' => substr(sha1((string)($popup['updated_at'] ?? '') . '|' . $title . '|' . $description . '|' . $imagePath . '|' . $ctaText . '|' . $ctaLink), 0, 12),
+        ];
+    }
+
+    private static function fetchAboutPage(): array
+    {
+        $db = self::db();
+        $rows = $db->query("
+            SELECT setting_key, setting_value
+            FROM site_settings
+            WHERE setting_key IN (
+                'about_title',
+                'about_intro',
+                'about_cover_path',
+                'about_content_html'
+            )
+        ")->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        $defaultContent = '<h2>Una casa con historia en Buenos Aires</h2><p>Desde 1985 nos especializamos en la compra, venta, alquiler y restauracion de antiguedades y muebles unicos en el corazon de Flores, CABA.</p><p>Montepio es una casa familiar donde cada pieza se elige, se conserva y se ofrece con criterio de oficio. Trabajamos con muebles, objetos decorativos, luminarias, arte, piezas para ambientaciones y restauraciones a medida.</p><p>Nuestro recorrido combina experiencia, taller propio y atencion cercana para acompanar a quienes buscan una pieza especial, necesitan tasar un objeto o quieren recuperar el valor de un mueble con historia.</p>';
+        $coverPath = trim((string)($rows['about_cover_path'] ?? 'assets/brand/fachada-montepio.jpg'));
+
+        return [
+            'title' => trim((string)($rows['about_title'] ?? 'Quienes somos')),
+            'intro' => trim((string)($rows['about_intro'] ?? 'Una version extendida de nuestra historia, el oficio y la forma en que trabajamos cada pieza.')),
+            'cover_url' => $coverPath !== '' ? self::baseUrl() . '/' . ltrim($coverPath, '/') : null,
+            'content_html' => trim((string)($rows['about_content_html'] ?? $defaultContent)) ?: $defaultContent,
         ];
     }
 

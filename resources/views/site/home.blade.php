@@ -202,7 +202,7 @@
                         <li><span class="dot"></span>Alquiler para filmaciones y eventos</li>
                         <li><span class="dot"></span>Ventas presenciales y online</li>
                     </ul>
-                    <a href="https://wa.me/5491165714568" class="btn-green" target="_blank" rel="noopener">Contactanos</a>
+                    <a href="{{ $siteBase }}/quienes-somos" class="btn-green">Contactanos</a>
                 </div>
             </div>
         </div>
@@ -212,8 +212,7 @@
         <div class="map-wrapper">
             <div class="map-info">
                 <div>
-                    <p class="section-label">Visitanos</p>
-                    <h2 class="section-title">Donde estamos</h2>
+                    <h2 class="section-title">Visitanos</h2>
                 </div>
                 <div class="map-contact-item">
                     <div class="icon-box">

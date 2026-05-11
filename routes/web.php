@@ -22,6 +22,10 @@ Route::get('/catalogo', function () {
     return view('site.catalog', SiteCatalog::catalogViewData((string) request()->query('q', '')));
 });
 
+Route::get('/quienes-somos', function () {
+    return view('site.about', SiteCatalog::aboutViewData());
+});
+
 Route::get('/catalogo/{category}', function (string $category) {
     $data = SiteCatalog::categoryViewData($category);
     abort_if($data === null, 404);

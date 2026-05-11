@@ -200,6 +200,72 @@ function image_process_site_popup(string $srcPath): string|false
     return 'uploads/site/' . $hash . '_site_popup.jpg';
 }
 
+function image_process_about_cover(string $srcPath): string|false
+{
+    if (!extension_loaded('gd')) {
+        error_log('GD no esta habilitado. Habilitar extension=gd en php.ini');
+        return false;
+    }
+
+    $info = @getimagesize($srcPath);
+    if (!$info) return false;
+
+    $src = image_create_from_path($srcPath, $info[2]);
+    if (!$src) return false;
+
+    $src = image_fix_orientation($src, $srcPath);
+    $src = image_flatten_to_white($src);
+
+    $w = imagesx($src);
+    $h = imagesy($src);
+
+    $dir = UPLOADS_PATH . '/site';
+    if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+    $hash = substr(sha1_file($srcPath), 0, 12);
+    $cover = image_resize_cover($src, $w, $h, 1920, 760);
+    $path = $dir . '/' . $hash . '_about_cover.jpg';
+    imagejpeg($cover, $path, IMG_FULL_QUALITY);
+
+    imagedestroy($cover);
+    imagedestroy($src);
+
+    return 'uploads/site/' . $hash . '_about_cover.jpg';
+}
+
+function image_process_about_content(string $srcPath): string|false
+{
+    if (!extension_loaded('gd')) {
+        error_log('GD no esta habilitado. Habilitar extension=gd en php.ini');
+        return false;
+    }
+
+    $info = @getimagesize($srcPath);
+    if (!$info) return false;
+
+    $src = image_create_from_path($srcPath, $info[2]);
+    if (!$src) return false;
+
+    $src = image_fix_orientation($src, $srcPath);
+    $src = image_flatten_to_white($src);
+
+    $w = imagesx($src);
+    $h = imagesy($src);
+
+    $dir = UPLOADS_PATH . '/site/about';
+    if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+    $hash = substr(sha1_file($srcPath), 0, 12);
+    $content = image_resize_max($src, $w, $h, 1200);
+    $path = $dir . '/' . $hash . '_content.jpg';
+    imagejpeg($content, $path, IMG_FULL_QUALITY);
+
+    imagedestroy($content);
+    imagedestroy($src);
+
+    return 'uploads/site/about/' . $hash . '_content.jpg';
+}
+
 function image_validate_upload(string $path, int $sizeBytes, ?string &$error = null): bool
 {
     if ($sizeBytes > MAX_UPLOAD_MB * 1024 * 1024) {
