@@ -156,6 +156,34 @@ layout_sidebar($isEdit ? '' : 'producto.php');
       </div>
 
       <div class="card" style="margin-bottom:20px;">
+        <div class="card-header">
+          <h3>Imagenes</h3>
+          <span class="text-sm text-m">JPG, PNG, WEBP - Max <?= MAX_UPLOAD_MB ?>MB - hasta <?= MAX_IMAGE_WIDTH ?>x<?= MAX_IMAGE_HEIGHT ?> px</span>
+        </div>
+        <div class="card-body">
+          <?php if (!empty($images)): ?>
+            <div class="img-previews" id="existingImgs">
+              <?php foreach ($images as $img): ?>
+                <div class="img-preview-item" id="img-<?= (int)$img['id'] ?>">
+                  <img src="/Montepio/<?= h($img['path_thumb']) ?>" alt="">
+                  <?php if ($img['is_cover']): ?>
+                    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,77,51,.7);color:white;font-size:9px;text-align:center;padding:2px;">portada</div>
+                  <?php endif; ?>
+                  <button type="button" class="del-btn" onclick="submitDeleteImage(<?= (int)$img['id'] ?>)">x</button>
+                </div>
+              <?php endforeach; ?>
+            </div>
+            <div class="sep"></div>
+          <?php endif; ?>
+
+          <label>Agregar imagenes</label>
+          <input type="file" name="images[]" multiple accept="image/jpeg,image/png,image/webp,image/gif" id="imgInput" style="margin-top:6px;">
+          <div class="img-previews" id="newImgPreviews"></div>
+          <p class="form-hint" style="margin-top:8px;">La primera imagen valida se usa como portada si todavia no hay una definida.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
         <div class="card-header"><h3>Descripcion</h3></div>
         <div class="card-body">
           <div class="form-group">
@@ -205,33 +233,6 @@ layout_sidebar($isEdit ? '' : 'producto.php');
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h3>Imagenes</h3>
-          <span class="text-sm text-m">JPG, PNG, WEBP · Max <?= MAX_UPLOAD_MB ?>MB · hasta <?= MAX_IMAGE_WIDTH ?>x<?= MAX_IMAGE_HEIGHT ?> px</span>
-        </div>
-        <div class="card-body">
-          <?php if (!empty($images)): ?>
-            <div class="img-previews" id="existingImgs">
-              <?php foreach ($images as $img): ?>
-                <div class="img-preview-item" id="img-<?= (int)$img['id'] ?>">
-                  <img src="/Montepio/<?= h($img['path_thumb']) ?>" alt="">
-                  <?php if ($img['is_cover']): ?>
-                    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,77,51,.7);color:white;font-size:9px;text-align:center;padding:2px;">portada</div>
-                  <?php endif; ?>
-                  <button type="button" class="del-btn" onclick="submitDeleteImage(<?= (int)$img['id'] ?>)">x</button>
-                </div>
-              <?php endforeach; ?>
-            </div>
-            <div class="sep"></div>
-          <?php endif; ?>
-
-          <label>Agregar imagenes</label>
-          <input type="file" name="images[]" multiple accept="image/jpeg,image/png,image/webp,image/gif" id="imgInput" style="margin-top:6px;">
-          <div class="img-previews" id="newImgPreviews"></div>
-          <p class="form-hint" style="margin-top:8px;">La primera imagen valida se usa como portada si todavia no hay una definida.</p>
-        </div>
-      </div>
     </div>
 
     <div>
