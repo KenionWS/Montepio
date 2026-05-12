@@ -9,8 +9,15 @@
 .env
 .env.backup
 data/pass.php
+data/*.sqlite
+data/*.sqlite-*
+!data/.htaccess
+uploads/categories/
+uploads/products/
+uploads/site/
 uploads/temp/*
 !uploads/temp/.gitignore
+!uploads/.htaccess
 .phpunit.result.cache
 docker-compose.override.yml
 Homestead.json
