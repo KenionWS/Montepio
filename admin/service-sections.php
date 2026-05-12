@@ -228,6 +228,12 @@ layout_head('Secciones de servicios', '<style>
 .rich-editor p{margin:0 0 13px}
 .rich-editor ul,.rich-editor ol{margin:0 0 14px 22px}
 .rich-editor img{display:block;max-width:100%;height:auto;border-radius:10px;margin:16px 0}
+.rich-editor figure.is-selected{outline:2px solid var(--green);outline-offset:4px;border-radius:10px}
+.editor-image-tools{display:none;gap:8px;align-items:center;margin-top:10px;padding:10px;border:1px solid #d8d2c9;border-radius:8px;background:var(--gray-l)}
+.editor-image-tools.is-visible{display:flex}
+.editor-image-tools span{font-size:12px;color:var(--gray-d);font-weight:600;margin-right:auto}
+.editor-image-tools button{height:30px;border:1px solid #d8d2c9;border-radius:6px;background:white;color:var(--text);font-size:12px;font-weight:700;padding:0 10px;cursor:pointer}
+.editor-image-tools button:disabled{opacity:.45;cursor:not-allowed}
 .editor-status{font-size:12px;color:var(--gray-m);margin-top:8px;min-height:18px}
 .section-preview-card{position:sticky;top:82px}
 .section-page-preview{border:1px solid #ece7dd;border-radius:12px;overflow:hidden;background:var(--cream)}
@@ -304,6 +310,11 @@ layout_sidebar('service-sections.php');
           </div>
           <div id="sectionEditor" class="rich-editor" contenteditable="true"><?= (string)$settings['content_html'] ?></div>
           <input type="hidden" name="section_content_html" id="sectionContentInput">
+          <div class="editor-image-tools" id="sectionImageTools">
+            <span>Imagen seleccionada</span>
+            <button type="button" id="sectionImageUp">Subir</button>
+            <button type="button" id="sectionImageDown">Bajar</button>
+          </div>
           <div class="editor-status" id="sectionEditorStatus"></div>
           <span class="form-hint">Podes dar formato al texto, agregar links e insertar imagenes dentro del contenido.</span>
         </div>
@@ -344,7 +355,11 @@ const statusEl = document.getElementById('sectionEditorStatus');
 const titleInput = document.getElementById('section_title');
 const introInput = document.getElementById('section_intro');
 const sectionSlug = document.getElementById('sectionSlug').value;
+const imageTools = document.getElementById('sectionImageTools');
+const imageUpButton = document.getElementById('sectionImageUp');
+const imageDownButton = document.getElementById('sectionImageDown');
 let savedEditorRange = null;
+let selectedFigure = null;
 
 function selectionBelongsToEditor(selection) {
   if (!selection || selection.rangeCount === 0) return false;
@@ -393,6 +408,52 @@ function insertEditorHtml(html) {
     savedEditorRange = range.cloneRange();
   }
 }
+
+function editorElementSibling(node, direction) {
+  let sibling = direction === 'previous' ? node.previousSibling : node.nextSibling;
+  while (sibling && sibling.nodeType === Node.TEXT_NODE && sibling.textContent.trim() === '') {
+    sibling = direction === 'previous' ? sibling.previousSibling : sibling.nextSibling;
+  }
+  return sibling;
+}
+
+function selectEditorFigure(figure) {
+  if (selectedFigure) {
+    selectedFigure.classList.remove('is-selected');
+  }
+  selectedFigure = figure;
+  if (!selectedFigure) {
+    imageTools.classList.remove('is-visible');
+    return;
+  }
+  selectedFigure.classList.add('is-selected');
+  imageTools.classList.add('is-visible');
+  imageUpButton.disabled = !editorElementSibling(selectedFigure, 'previous');
+  imageDownButton.disabled = !editorElementSibling(selectedFigure, 'next');
+}
+
+editor.addEventListener('click', (event) => {
+  const figure = event.target.closest('figure');
+  selectEditorFigure(figure && editor.contains(figure) ? figure : null);
+});
+
+imageUpButton.addEventListener('click', () => {
+  if (!selectedFigure) return;
+  const previous = editorElementSibling(selectedFigure, 'previous');
+  if (!previous) return;
+  editor.insertBefore(selectedFigure, previous);
+  selectEditorFigure(selectedFigure);
+  saveEditorSelection();
+});
+
+imageDownButton.addEventListener('click', () => {
+  if (!selectedFigure) return;
+  const next = editorElementSibling(selectedFigure, 'next');
+  if (!next) return;
+  editor.insertBefore(next, selectedFigure);
+  selectEditorFigure(selectedFigure);
+  saveEditorSelection();
+});
 
 function editorCommand(command, value = null) {
   restoreEditorSelection();
