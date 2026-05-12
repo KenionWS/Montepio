@@ -25,6 +25,72 @@ function hero_admin_link_is_valid(string $value): bool
     return (bool)preg_match('~^https?://~i', $value);
 }
 
+function contact_admin_link_is_valid(string $value): bool
+{
+    if (hero_admin_link_is_valid($value)) {
+        return true;
+    }
+
+    return (bool)preg_match('~^(tel|mailto):~i', $value);
+}
+
+function contact_admin_defaults(): array
+{
+    return [
+        'title' => 'Visitanos',
+        'items' => [
+            'address' => ['label' => 'Direccion', 'value' => "Av. Rivadavia 7701, Flores\nCiudad de Buenos Aires", 'link' => 'https://maps.app.goo.gl/7YhnpWUrzZuzrprr9'],
+            'hours' => ['label' => 'Horarios de atencion', 'value' => "Lunes a viernes de 9 a 18\nSabados de 9 a 17", 'link' => ''],
+            'phones' => ['label' => 'Telefonos', 'value' => '4612-1221 / 4612-8787', 'link' => 'tel:46121221'],
+            'whatsapp' => ['label' => 'WhatsApp', 'value' => '116571-4568', 'link' => 'https://wa.me/5491165714568'],
+            'email' => ['label' => 'Email', 'value' => 'montepioantiguedades@gmail.com', 'link' => 'mailto:montepioantiguedades@gmail.com'],
+            'instagram' => ['label' => 'Instagram', 'value' => 'Seguinos en Instagram', 'link' => 'https://www.instagram.com/'],
+        ],
+    ];
+}
+
+function contact_admin_settings(PDO $db): array
+{
+    $defaults = contact_admin_defaults();
+    $keys = ['home_contact_title'];
+    foreach (array_keys($defaults['items']) as $key) {
+        $keys[] = 'home_contact_' . $key . '_label';
+        $keys[] = 'home_contact_' . $key . '_value';
+        $keys[] = 'home_contact_' . $key . '_link';
+    }
+
+    $placeholders = implode(',', array_fill(0, count($keys), '?'));
+    $stmt = $db->prepare("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ($placeholders)");
+    $stmt->execute($keys);
+    $rows = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+    $items = [];
+    foreach ($defaults['items'] as $key => $item) {
+        $items[$key] = [
+            'label' => trim((string)($rows['home_contact_' . $key . '_label'] ?? $item['label'])),
+            'value' => trim((string)($rows['home_contact_' . $key . '_value'] ?? $item['value'])),
+            'link' => trim((string)($rows['home_contact_' . $key . '_link'] ?? $item['link'])),
+        ];
+    }
+
+    return [
+        'title' => trim((string)($rows['home_contact_title'] ?? $defaults['title'])),
+        'items' => $items,
+    ];
+}
+
+function contact_admin_save_setting(PDO $db, string $key, string $value): void
+{
+    $stmt = $db->prepare("
+        INSERT INTO site_settings (setting_key, setting_value, updated_at)
+        VALUES (?, ?, datetime('now'))
+        ON CONFLICT(setting_key) DO UPDATE SET
+            setting_value = excluded.setting_value,
+            updated_at = datetime('now')
+    ");
+    $stmt->execute([$key, $value]);
+}
+
 function hero_admin_fetch_slides(PDO $db): array
 {
     return $db->query("
@@ -109,6 +175,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
 
     $action = (string)($_POST['action'] ?? 'save');
+
+    if ($action === 'save_contact') {
+        $defaults = contact_admin_defaults();
+        $title = trim((string)($_POST['contact_title'] ?? ''));
+
+        if ($title === '') {
+            flash_set('err', 'El titulo de Visitanos es obligatorio.');
+            header('Location: ' . ADMIN_URL . '/home.php#visitanos-home');
+            exit;
+        }
+
+        $items = [];
+        foreach ($defaults['items'] as $key => $item) {
+            $label = trim((string)($_POST['contact_' . $key . '_label'] ?? ''));
+            $value = trim((string)($_POST['contact_' . $key . '_value'] ?? ''));
+            $link = trim((string)($_POST['contact_' . $key . '_link'] ?? ''));
+
+            if ($label === '' || $value === '') {
+                flash_set('err', 'Cada item de Visitanos necesita titulo y valor.');
+                header('Location: ' . ADMIN_URL . '/home.php#visitanos-home');
+                exit;
+            }
+
+            if (!contact_admin_link_is_valid($link)) {
+                flash_set('err', 'Hay un link no valido en Visitanos. Podes usar https://..., /ruta, tel:... o mailto:...');
+                header('Location: ' . ADMIN_URL . '/home.php#visitanos-home');
+                exit;
+            }
+
+            $items[$key] = compact('label', 'value', 'link');
+        }
+
+        contact_admin_save_setting($db, 'home_contact_title', $title);
+        foreach ($items as $key => $item) {
+            contact_admin_save_setting($db, 'home_contact_' . $key . '_label', $item['label']);
+            contact_admin_save_setting($db, 'home_contact_' . $key . '_value', $item['value']);
+            contact_admin_save_setting($db, 'home_contact_' . $key . '_link', $item['link']);
+        }
+
+        flash_set('ok', 'Bloque Visitanos actualizado.');
+        header('Location: ' . ADMIN_URL . '/home.php#visitanos-home');
+        exit;
+    }
 
     if ($action === 'delete_service') {
         $blockId = max(0, (int)($_POST['block_id'] ?? 0));
@@ -427,6 +536,7 @@ $formData = [
 ];
 
 $heroImageUrl = $formData['image_path'] !== '' ? BASE_URL . '/' . ltrim($formData['image_path'], '/') : '';
+$contactSettings = contact_admin_settings($db);
 $serviceFormData = [
     'id' => (int)($editingService['id'] ?? 0),
     'image_path' => trim((string)($editingService['image_path'] ?? '')),
@@ -443,6 +553,7 @@ $topbarActions = [
     ['href' => BASE_URL . '/', 'label' => 'Ver home', 'class' => 'btn btn-outline btn-sm'],
     ['href' => ADMIN_URL . '/home.php#slides-home', 'label' => 'Slides', 'class' => 'btn btn-outline btn-sm'],
     ['href' => ADMIN_URL . '/home.php#servicios-home', 'label' => 'Bloques', 'class' => 'btn btn-outline btn-sm'],
+    ['href' => ADMIN_URL . '/home.php#visitanos-home', 'label' => 'Visitanos', 'class' => 'btn btn-outline btn-sm'],
 ];
 
 if ($editingSlide) {
@@ -464,6 +575,7 @@ layout_sidebar('home.php');
 <div class="home-admin-nav">
   <a href="#slides-home" class="home-admin-nav-link">Slides del hero</a>
   <a href="#servicios-home" class="home-admin-nav-link">Bloques de servicios</a>
+  <a href="#visitanos-home" class="home-admin-nav-link">Visitanos</a>
 </div>
 
 <section class="home-admin-section" id="slides-home">
@@ -741,6 +853,62 @@ layout_sidebar('home.php');
 
 </section>
 
+<section class="home-admin-section" id="visitanos-home">
+  <div class="home-admin-section-head">
+    <div>
+      <span class="section-kicker">Home</span>
+      <h2>Visitanos</h2>
+      <p>Edicion del bloque de contacto que aparece junto al mapa: titulo, valores visibles y links.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>Datos del bloque</h3>
+      <span class="text-sm text-m">Titulo, valor y link por item</span>
+    </div>
+    <div class="card-body">
+      <form method="POST" class="form-grid">
+        <?= csrf_input() ?>
+        <input type="hidden" name="action" value="save_contact">
+
+        <div class="form-group form-full">
+          <label for="contact_title">Titulo general</label>
+          <input type="text" id="contact_title" name="contact_title" value="<?= h($contactSettings['title']) ?>" placeholder="Visitanos">
+        </div>
+
+        <?php foreach ($contactSettings['items'] as $key => $item): ?>
+          <div class="contact-admin-item form-full">
+            <div class="contact-admin-item-head">
+              <strong><?= h($item['label']) ?></strong>
+              <span class="text-sm text-m"><?= h($key) ?></span>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="contact_<?= h($key) ?>_label">Titulo</label>
+                <input type="text" id="contact_<?= h($key) ?>_label" name="contact_<?= h($key) ?>_label" value="<?= h($item['label']) ?>">
+              </div>
+              <div class="form-group">
+                <label for="contact_<?= h($key) ?>_link">Link</label>
+                <input type="text" id="contact_<?= h($key) ?>_link" name="contact_<?= h($key) ?>_link" value="<?= h($item['link']) ?>" placeholder="https://..., tel:..., mailto:...">
+              </div>
+              <div class="form-group form-full">
+                <label for="contact_<?= h($key) ?>_value">Valor visible</label>
+                <textarea id="contact_<?= h($key) ?>_value" name="contact_<?= h($key) ?>_value" rows="2"><?= h($item['value']) ?></textarea>
+                <span class="form-hint">Podes usar saltos de linea. El link es opcional.</span>
+              </div>
+            </div>
+          </div>
+        <?php endforeach; ?>
+
+        <div class="form-group form-full">
+          <button type="submit" class="btn btn-primary">Guardar Visitanos</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
 </div>
 </div>
 
@@ -760,6 +928,10 @@ layout_sidebar('home.php');
 .services-admin-section{margin-top:0}
 .service-admin-preview{overflow:hidden;border:1px solid #ece7dd;border-radius:14px;background:var(--gray-l)}
 .service-admin-preview img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+.contact-admin-item{padding:16px;border:1px solid #ece7dd;border-radius:12px;background:#fff}
+.contact-admin-item + .contact-admin-item{margin-top:2px}
+.contact-admin-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.contact-admin-item-head strong{font-size:14px;color:var(--text)}
 .checkbox-line{display:flex;align-items:center;gap:10px;font-weight:400}
 .checkbox-line input{width:auto}
 .slides-admin-list{display:flex;flex-direction:column;gap:14px}

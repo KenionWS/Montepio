@@ -51,6 +51,7 @@ class SiteCatalog
             'defaultProductIcon' => self::DEFAULT_PRODUCT_ICON,
             'homeHeroSlides' => $homeHeroSlides,
             'homeServiceBlocks' => $homeServiceBlocks,
+            'homeContact' => self::fetchHomeContact(),
             'sitePopup' => self::fetchSitePopup(),
             'stats' => [
                 'total_products' => (int)($stats['total_products'] ?? 0),
@@ -800,6 +801,85 @@ class SiteCatalog
             'cta_text' => $ctaText,
             'cta_link' => $ctaLink,
             'version' => substr(sha1((string)($popup['updated_at'] ?? '') . '|' . $title . '|' . $description . '|' . $imagePath . '|' . $ctaText . '|' . $ctaLink), 0, 12),
+        ];
+    }
+
+    private static function homeContactDefaults(): array
+    {
+        return [
+            'title' => 'Visitanos',
+            'items' => [
+                'address' => [
+                    'label' => 'Direccion',
+                    'value' => "Av. Rivadavia 7701, Flores\nCiudad de Buenos Aires",
+                    'link' => 'https://maps.app.goo.gl/7YhnpWUrzZuzrprr9',
+                ],
+                'hours' => [
+                    'label' => 'Horarios de atencion',
+                    'value' => "Lunes a viernes de 9 a 18\nSabados de 9 a 17",
+                    'link' => '',
+                ],
+                'phones' => [
+                    'label' => 'Telefonos',
+                    'value' => '4612-1221 / 4612-8787',
+                    'link' => 'tel:46121221',
+                ],
+                'whatsapp' => [
+                    'label' => 'WhatsApp',
+                    'value' => '116571-4568',
+                    'link' => 'https://wa.me/5491165714568',
+                ],
+                'email' => [
+                    'label' => 'Email',
+                    'value' => 'montepioantiguedades@gmail.com',
+                    'link' => 'mailto:montepioantiguedades@gmail.com',
+                ],
+                'instagram' => [
+                    'label' => 'Instagram',
+                    'value' => 'Seguinos en Instagram',
+                    'link' => 'https://www.instagram.com/',
+                ],
+            ],
+        ];
+    }
+
+    private static function fetchHomeContact(): array
+    {
+        $defaults = self::homeContactDefaults();
+        $keys = ['home_contact_title'];
+        foreach (array_keys($defaults['items']) as $key) {
+            $keys[] = 'home_contact_' . $key . '_label';
+            $keys[] = 'home_contact_' . $key . '_value';
+            $keys[] = 'home_contact_' . $key . '_link';
+        }
+
+        $db = self::db();
+        $placeholders = implode(',', array_fill(0, count($keys), '?'));
+        $stmt = $db->prepare("
+            SELECT setting_key, setting_value
+            FROM site_settings
+            WHERE setting_key IN ($placeholders)
+        ");
+        $stmt->execute($keys);
+        $rows = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        $items = [];
+        foreach ($defaults['items'] as $key => $item) {
+            $link = trim((string)($rows['home_contact_' . $key . '_link'] ?? $item['link']));
+            if ($link !== '' && str_starts_with($link, '/')) {
+                $link = self::baseUrl() . $link;
+            }
+
+            $items[$key] = [
+                'label' => trim((string)($rows['home_contact_' . $key . '_label'] ?? $item['label'])),
+                'value' => trim((string)($rows['home_contact_' . $key . '_value'] ?? $item['value'])),
+                'link' => $link,
+            ];
+        }
+
+        return [
+            'title' => trim((string)($rows['home_contact_title'] ?? $defaults['title'])),
+            'items' => $items,
         ];
     }
 
