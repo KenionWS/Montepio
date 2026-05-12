@@ -26,6 +26,13 @@ Route::get('/quienes-somos', function () {
     return view('site.about', SiteCatalog::aboutViewData());
 });
 
+Route::get('/{servicePage}', function (string $servicePage) {
+    $data = SiteCatalog::servicePageViewData($servicePage);
+    abort_if($data === null, 404);
+
+    return view('site.service-page', $data);
+})->where('servicePage', 'alquileres|compra-venta|restauraciones');
+
 Route::get('/catalogo/{category}', function (string $category) {
     $data = SiteCatalog::categoryViewData($category);
     abort_if($data === null, 404);

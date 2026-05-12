@@ -106,7 +106,7 @@ img {
 }
 
 .header-inner {
-  min-height: 72px;
+  min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -120,7 +120,7 @@ img {
 }
 
 .site-logo-image {
-  height: 56px;
+  height: 65px;
   width: auto;
 }
 
@@ -230,9 +230,9 @@ img {
 
 .nav-item > a,
 .nav-inner > a {
-  color: rgba(255,255,255,0.82);
-  font-size: 12px;
-  font-weight: 500;
+  color: rgba(255,255,255, 1);
+  font-size: 15px;
+  font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   padding: 13px 14px;
@@ -507,8 +507,8 @@ img {
   position: fixed;
   right: 28px;
   bottom: 28px;
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;

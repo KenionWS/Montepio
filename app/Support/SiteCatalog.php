@@ -361,6 +361,23 @@ class SiteCatalog
         ];
     }
 
+    public static function servicePageViewData(string $slug): ?array
+    {
+        $page = self::fetchServicePage($slug);
+        if ($page === null) {
+            return null;
+        }
+
+        return [
+            'baseUrl' => self::baseUrl(),
+            'defaultCategoryIcon' => self::DEFAULT_CATEGORY_ICON,
+            'defaultProductIcon' => self::DEFAULT_PRODUCT_ICON,
+            'navCategories' => self::fetchCategoryTree(),
+            'sitePopup' => self::fetchSitePopup(),
+            'servicePage' => $page,
+        ];
+    }
+
     private static function fetchProducts(string $suffixSql, array $params = []): array
     {
         $db = self::db();
@@ -701,6 +718,7 @@ class SiteCatalog
                 [
                     'id' => 0,
                     'image_path' => 'assets/site/alquileres.png',
+                    'link_url' => '/alquileres',
                     'title' => 'Alquileres',
                     'description' => 'Muebles y objetos para producciones, eventos, vidrieras y ambientaciones.',
                     'style_key' => 'rent',
@@ -708,6 +726,7 @@ class SiteCatalog
                 [
                     'id' => 0,
                     'image_path' => 'assets/site/venta.png',
+                    'link_url' => '/compra-venta',
                     'title' => 'Compra y venta',
                     'description' => 'Tasacion sin cargo y piezas seleccionadas para sumar caracter a cada ambiente.',
                     'style_key' => 'buy',
@@ -715,6 +734,7 @@ class SiteCatalog
                 [
                     'id' => 0,
                     'image_path' => 'assets/site/restauraciones.png',
+                    'link_url' => '/restauraciones',
                     'title' => 'Restauraciones',
                     'description' => 'Lustre, retapizados, esterillados y trabajos artesanales con criterio de epoca.',
                     'style_key' => 'restore',
@@ -732,6 +752,7 @@ class SiteCatalog
             return [
                 'id' => (int)($block['id'] ?? 0),
                 'image_url' => self::baseUrl() . '/' . ltrim(trim((string)($block['image_path'] ?? '')), '/'),
+                'link_url' => self::normalizeServiceLink(trim((string)($block['link_url'] ?? '')), $styleKey),
                 'title' => trim((string)($block['title'] ?? '')),
                 'description' => trim((string)($block['description'] ?? '')),
                 'class' => $styleKey === 'default' ? 'service-card-default' : 'service-card-' . $styleKey,
@@ -805,6 +826,84 @@ class SiteCatalog
             'cover_url' => $coverPath !== '' ? self::baseUrl() . '/' . ltrim($coverPath, '/') : null,
             'content_html' => trim((string)($rows['about_content_html'] ?? $defaultContent)) ?: $defaultContent,
         ];
+    }
+
+    private static function servicePageDefaults(): array
+    {
+        return [
+            'alquileres' => [
+                'title' => 'Alquileres',
+                'intro' => 'Muebles y objetos para producciones, eventos, vidrieras y ambientaciones.',
+                'cover_path' => 'assets/site/alquileres.png',
+                'content_html' => '<h2>Alquileres para producciones y eventos</h2><p>Contamos con muebles, objetos decorativos, luminarias y piezas especiales para ambientaciones, filmaciones, vidrieras, sesiones fotograficas y eventos.</p><p>Podemos asesorarte para elegir piezas con caracter, coordinar disponibilidad y preparar cada objeto para su retiro o traslado.</p>',
+            ],
+            'compra-venta' => [
+                'title' => 'Compra y venta',
+                'intro' => 'Tasacion sin cargo y piezas seleccionadas para sumar caracter a cada ambiente.',
+                'cover_path' => 'assets/site/venta.png',
+                'content_html' => '<h2>Compra y venta de antiguedades</h2><p>Seleccionamos muebles, objetos y piezas con historia para quienes buscan incorporar caracter, oficio y materiales nobles a sus espacios.</p><p>Tambien recibimos consultas por tasaciones y compra de piezas. Evaluamos cada objeto con criterio y acompanamos el proceso de forma clara.</p>',
+            ],
+            'restauraciones' => [
+                'title' => 'Restauraciones',
+                'intro' => 'Lustre, retapizados, esterillados y trabajos artesanales con criterio de epoca.',
+                'cover_path' => 'assets/site/restauraciones.png',
+                'content_html' => '<h2>Restauraciones a medida</h2><p>Trabajamos en la recuperacion de muebles y objetos respetando su identidad, materiales y epoca. Realizamos lustres, retapizados, esterillados y reparaciones artesanales.</p><p>Cada trabajo se evalua segun el estado de la pieza y el resultado buscado, con una mirada puesta en conservar su valor y funcionalidad.</p>',
+            ],
+        ];
+    }
+
+    private static function fetchServicePage(string $slug): ?array
+    {
+        $defaults = self::servicePageDefaults();
+        if (!isset($defaults[$slug])) {
+            return null;
+        }
+
+        $db = self::db();
+        $prefix = 'service_' . str_replace('-', '_', $slug) . '_';
+        $keys = [
+            $prefix . 'title',
+            $prefix . 'intro',
+            $prefix . 'cover_path',
+            $prefix . 'content_html',
+        ];
+
+        $placeholders = implode(',', array_fill(0, count($keys), '?'));
+        $stmt = $db->prepare("
+            SELECT setting_key, setting_value
+            FROM site_settings
+            WHERE setting_key IN ($placeholders)
+        ");
+        $stmt->execute($keys);
+        $rows = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+        $pageDefaults = $defaults[$slug];
+        $coverPath = trim((string)($rows[$prefix . 'cover_path'] ?? $pageDefaults['cover_path']));
+
+        return [
+            'slug' => $slug,
+            'title' => trim((string)($rows[$prefix . 'title'] ?? $pageDefaults['title'])),
+            'intro' => trim((string)($rows[$prefix . 'intro'] ?? $pageDefaults['intro'])),
+            'cover_url' => $coverPath !== '' ? self::baseUrl() . '/' . ltrim($coverPath, '/') : null,
+            'content_html' => trim((string)($rows[$prefix . 'content_html'] ?? $pageDefaults['content_html'])) ?: $pageDefaults['content_html'],
+        ];
+    }
+
+    private static function normalizeServiceLink(string $linkUrl, string $styleKey): string
+    {
+        if ($linkUrl === '') {
+            $linkUrl = match ($styleKey) {
+                'rent' => '/alquileres',
+                'buy' => '/compra-venta',
+                'restore' => '/restauraciones',
+                default => '',
+            };
+        }
+
+        if ($linkUrl !== '' && str_starts_with($linkUrl, '/')) {
+            return self::baseUrl() . $linkUrl;
+        }
+
+        return $linkUrl;
     }
 
     private static function db(): PDO

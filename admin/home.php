@@ -144,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $blockId = max(0, (int)($_POST['block_id'] ?? 0));
         $serviceTitle = trim((string)($_POST['service_title'] ?? ''));
         $serviceDescription = trim((string)($_POST['service_description'] ?? ''));
+        $serviceLink = trim((string)($_POST['service_link'] ?? ''));
         $styleKey = trim((string)($_POST['style_key'] ?? 'default'));
         $position = max(0, (int)($_POST['service_position'] ?? 0));
         $isActive = isset($_POST['service_is_active']) ? 1 : 0;
@@ -155,6 +156,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($serviceTitle === '') {
             flash_set('err', 'El titulo del bloque es obligatorio.');
+            header('Location: ' . ADMIN_URL . '/home.php' . ($blockId > 0 ? '?edit_service=' . $blockId : '') . '#servicios-home');
+            exit;
+        }
+
+        if (!hero_admin_link_is_valid($serviceLink)) {
+            flash_set('err', 'El link del bloque no es valido. Podes usar https://..., una ruta como /alquileres o un ancla como #categorias.');
             header('Location: ' . ADMIN_URL . '/home.php' . ($blockId > 0 ? '?edit_service=' . $blockId : '') . '#servicios-home');
             exit;
         }
@@ -208,23 +215,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($existingBlock) {
             $stmt = $db->prepare("
                 UPDATE home_service_blocks
-                SET image_path = ?, title = ?, description = ?, style_key = ?,
+                SET image_path = ?, link_url = ?, title = ?, description = ?, style_key = ?,
                     position = ?, is_active = ?, updated_at = datetime('now')
                 WHERE id = ?
             ");
             $stmt->execute([
-                $serviceImagePath, $serviceTitle, $serviceDescription, $styleKey,
+                $serviceImagePath, $serviceLink, $serviceTitle, $serviceDescription, $styleKey,
                 $position, $isActive, $blockId
             ]);
             flash_set('ok', 'Bloque actualizado.');
         } else {
             $stmt = $db->prepare("
                 INSERT INTO home_service_blocks (
-                    image_path, title, description, style_key, position, is_active, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+                    image_path, link_url, title, description, style_key, position, is_active, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
             ");
             $stmt->execute([
-                $serviceImagePath, $serviceTitle, $serviceDescription, $styleKey,
+                $serviceImagePath, $serviceLink, $serviceTitle, $serviceDescription, $styleKey,
                 $position, $isActive
             ]);
             flash_set('ok', 'Bloque creado.');
@@ -423,6 +430,7 @@ $heroImageUrl = $formData['image_path'] !== '' ? BASE_URL . '/' . ltrim($formDat
 $serviceFormData = [
     'id' => (int)($editingService['id'] ?? 0),
     'image_path' => trim((string)($editingService['image_path'] ?? '')),
+    'link_url' => trim((string)($editingService['link_url'] ?? '')),
     'title' => trim((string)($editingService['title'] ?? '')),
     'description' => trim((string)($editingService['description'] ?? '')),
     'style_key' => trim((string)($editingService['style_key'] ?? 'default')),
@@ -647,6 +655,12 @@ layout_sidebar('home.php');
         </div>
 
         <div class="form-group">
+          <label for="service_link">Link del bloque</label>
+          <input type="text" id="service_link" name="service_link" value="<?= h($serviceFormData['link_url']) ?>" placeholder="/alquileres">
+          <span class="form-hint">Puede ser /alquileres, /compra-venta, /restauraciones o una URL completa.</span>
+        </div>
+
+        <div class="form-group">
           <label for="style_key">Estilo visual</label>
           <select id="style_key" name="style_key">
             <?php foreach ($serviceStyleOptions as $key => $label): ?>
@@ -701,6 +715,9 @@ layout_sidebar('home.php');
                   <span class="badge <?= (int)$block['is_active'] === 1 ? 'badge-green' : 'badge-gray' ?>"><?= (int)$block['is_active'] === 1 ? 'Activo' : 'Oculto' ?></span>
                 </div>
                 <div class="text-sm text-m">Orden <?= (int)$block['position'] ?> - <?= h($serviceStyleOptions[(string)$block['style_key']] ?? 'Verde neutro') ?></div>
+                <?php if (trim((string)($block['link_url'] ?? '')) !== ''): ?>
+                  <div class="text-sm text-m">Link <?= h((string)$block['link_url']) ?></div>
+                <?php endif; ?>
                 <?php if (trim((string)$block['description']) !== ''): ?>
                   <div class="text-sm"><?= h((string)$block['description']) ?></div>
                 <?php endif; ?>

@@ -129,6 +129,7 @@ function db_migrate(PDO $pdo): void
         CREATE TABLE IF NOT EXISTS home_service_blocks (
             id                         INTEGER PRIMARY KEY AUTOINCREMENT,
             image_path                 TEXT NOT NULL,
+            link_url                   TEXT,
             title                      TEXT NOT NULL,
             description                TEXT,
             style_key                  TEXT NOT NULL DEFAULT 'default',
@@ -162,6 +163,7 @@ function db_migrate(PDO $pdo): void
     db_add_column_if_missing($pdo, 'products', 'shipping_transport', 'INTEGER NOT NULL DEFAULT 0');
     db_add_column_if_missing($pdo, 'products', 'shipping_flete', 'INTEGER NOT NULL DEFAULT 0');
     db_add_column_if_missing($pdo, 'products', 'shipping_encomienda', 'INTEGER NOT NULL DEFAULT 0');
+    db_add_column_if_missing($pdo, 'home_service_blocks', 'link_url', 'TEXT');
 
     // Seed categorías por defecto si la tabla está vacía
     $count = $pdo->query('SELECT COUNT(*) FROM categories')->fetchColumn();
@@ -184,18 +186,28 @@ function db_migrate(PDO $pdo): void
     $serviceCount = (int)$pdo->query('SELECT COUNT(*) FROM home_service_blocks')->fetchColumn();
     if ($serviceCount === 0) {
         $services = [
-            ['assets/site/alquileres.png', 'Alquileres', 'Muebles y objetos para producciones, eventos, vidrieras y ambientaciones.', 'rent', 0],
-            ['assets/site/venta.png', 'Compra y venta', 'Tasacion sin cargo y piezas seleccionadas para sumar caracter a cada ambiente.', 'buy', 1],
-            ['assets/site/restauraciones.png', 'Restauraciones', 'Lustre, retapizados, esterillados y trabajos artesanales con criterio de epoca.', 'restore', 2],
+            ['assets/site/alquileres.png', '/alquileres', 'Alquileres', 'Muebles y objetos para producciones, eventos, vidrieras y ambientaciones.', 'rent', 0],
+            ['assets/site/venta.png', '/compra-venta', 'Compra y venta', 'Tasacion sin cargo y piezas seleccionadas para sumar caracter a cada ambiente.', 'buy', 1],
+            ['assets/site/restauraciones.png', '/restauraciones', 'Restauraciones', 'Lustre, retapizados, esterillados y trabajos artesanales con criterio de epoca.', 'restore', 2],
         ];
         $stmt = $pdo->prepare("
             INSERT INTO home_service_blocks (
-                image_path, title, description, style_key, position, is_active, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))
+                image_path, link_url, title, description, style_key, position, is_active, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))
         ");
         foreach ($services as $service) {
             $stmt->execute($service);
         }
+    }
+
+    $serviceLinkDefaults = [
+        'rent' => '/alquileres',
+        'buy' => '/compra-venta',
+        'restore' => '/restauraciones',
+    ];
+    $stmt = $pdo->prepare("UPDATE home_service_blocks SET link_url = ? WHERE style_key = ? AND (link_url IS NULL OR link_url = '')");
+    foreach ($serviceLinkDefaults as $styleKey => $linkUrl) {
+        $stmt->execute([$linkUrl, $styleKey]);
     }
 
     $popupCount = (int)$pdo->query('SELECT COUNT(*) FROM site_popup WHERE id = 1')->fetchColumn();

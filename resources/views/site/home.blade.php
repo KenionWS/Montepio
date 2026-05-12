@@ -114,14 +114,14 @@
         <div class="section-inner">
             <div class="services-grid-lg">
                 @foreach ($serviceCards as $serviceCard)
-                    <article class="service-feature {{ $serviceCard['class'] }}" @if(!empty($serviceCard['image_url'])) style="background-image:url('{{ $serviceCard['image_url'] }}')" @endif>
+                    <a href="{{ $serviceCard['link_url'] ?: '#' }}" class="service-feature {{ $serviceCard['class'] }}" @if(!empty($serviceCard['image_url'])) style="background-image:url('{{ $serviceCard['image_url'] }}')" @endif>
                         <div class="service-feature-overlay"></div>
                         <div class="service-feature-content">
                             <p class="service-kicker">Montepio</p>
                             <h2>{{ $serviceCard['title'] }}</h2>
                             <p>{{ $serviceCard['description'] }}</p>
                         </div>
-                    </article>
+                    </a>
                 @endforeach
             </div>
         </div>
