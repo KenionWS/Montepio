@@ -287,11 +287,65 @@ const contentInput = document.getElementById('aboutContentInput');
 const statusEl = document.getElementById('aboutEditorStatus');
 const titleInput = document.getElementById('about_title');
 const introInput = document.getElementById('about_intro');
+let savedEditorRange = null;
+
+function selectionBelongsToEditor(selection) {
+  if (!selection || selection.rangeCount === 0) return false;
+  const range = selection.getRangeAt(0);
+  return editor.contains(range.commonAncestorContainer);
+}
+
+function saveEditorSelection() {
+  const selection = window.getSelection();
+  if (!selectionBelongsToEditor(selection)) return;
+  savedEditorRange = selection.getRangeAt(0).cloneRange();
+}
+
+function restoreEditorSelection() {
+  editor.focus();
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+
+  if (savedEditorRange) {
+    selection.addRange(savedEditorRange);
+    return savedEditorRange;
+  }
+
+  const range = document.createRange();
+  range.selectNodeContents(editor);
+  range.collapse(false);
+  selection.addRange(range);
+  savedEditorRange = range.cloneRange();
+  return range;
+}
+
+function insertEditorHtml(html) {
+  const range = restoreEditorSelection();
+  range.deleteContents();
+
+  const fragment = range.createContextualFragment(html);
+  const lastNode = fragment.lastChild;
+  range.insertNode(fragment);
+
+  if (lastNode) {
+    range.setStartAfter(lastNode);
+    range.collapse(true);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    savedEditorRange = range.cloneRange();
+  }
+}
 
 function editorCommand(command, value = null) {
-  editor.focus();
+  restoreEditorSelection();
   document.execCommand(command, false, value);
+  saveEditorSelection();
 }
+
+['keyup', 'mouseup', 'input', 'focus'].forEach((eventName) => {
+  editor.addEventListener(eventName, saveEditorSelection);
+});
 
 document.querySelectorAll('[data-command]').forEach((button) => {
   button.addEventListener('click', () => editorCommand(button.dataset.command));
@@ -308,6 +362,7 @@ document.getElementById('aboutLinkButton').addEventListener('click', () => {
 });
 
 document.getElementById('aboutEditorImage').addEventListener('change', async function () {
+  restoreEditorSelection();
   const file = this.files[0];
   this.value = '';
   if (!file) return;
@@ -325,7 +380,7 @@ document.getElementById('aboutEditorImage').addEventListener('change', async fun
       statusEl.textContent = data.error || 'No se pudo subir la imagen.';
       return;
     }
-    editorCommand('insertHTML', '<figure><img src="' + data.url + '" alt=""><figcaption></figcaption></figure>');
+    insertEditorHtml('<figure><img src="' + data.url + '" alt=""><figcaption></figcaption></figure>');
     statusEl.textContent = 'Imagen insertada.';
   } catch (error) {
     statusEl.textContent = 'Error de red al subir la imagen.';
