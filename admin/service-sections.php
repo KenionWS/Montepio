@@ -305,7 +305,7 @@ layout_sidebar('service-sections.php');
             <button type="button" data-command="insertUnorderedList">Lista</button>
             <button type="button" data-command="insertOrderedList">1.</button>
             <button type="button" id="sectionLinkButton">Link</button>
-            <label for="sectionEditorImage">Imagen</label>
+            <label for="sectionEditorImage" id="sectionEditorImageButton">Imagen</label>
             <input type="file" id="sectionEditorImage" accept="image/*" style="display:none;">
           </div>
           <div id="sectionEditor" class="rich-editor" contenteditable="true"><?= (string)$settings['content_html'] ?></div>
@@ -360,6 +360,7 @@ const imageUpButton = document.getElementById('sectionImageUp');
 const imageDownButton = document.getElementById('sectionImageDown');
 let savedEditorRange = null;
 let selectedFigure = null;
+let imageInsertMarker = null;
 
 function selectionBelongsToEditor(selection) {
   if (!selection || selection.rangeCount === 0) return false;
@@ -409,8 +410,62 @@ function insertEditorHtml(html) {
   }
 }
 
+function removeImageInsertMarker() {
+  if (imageInsertMarker && imageInsertMarker.parentNode) {
+    imageInsertMarker.parentNode.removeChild(imageInsertMarker);
+  }
+  imageInsertMarker = null;
+}
+
+function placeImageInsertMarker() {
+  const range = restoreEditorSelection();
+  removeImageInsertMarker();
+  imageInsertMarker = document.createElement('span');
+  imageInsertMarker.setAttribute('data-editor-image-marker', '1');
+  imageInsertMarker.style.display = 'none';
+  range.insertNode(imageInsertMarker);
+  range.setStartAfter(imageInsertMarker);
+  range.collapse(true);
+  savedEditorRange = range.cloneRange();
+}
+
+function insertImageAtMarker(html) {
+  if (!imageInsertMarker || !imageInsertMarker.parentNode) {
+    insertEditorHtml(html);
+    return;
+  }
+
+  const range = document.createRange();
+  range.setStartBefore(imageInsertMarker);
+  const fragment = range.createContextualFragment(html);
+  const lastNode = fragment.lastChild;
+  imageInsertMarker.parentNode.insertBefore(fragment, imageInsertMarker);
+  removeImageInsertMarker();
+
+  if (lastNode) {
+    range.setStartAfter(lastNode);
+    range.collapse(true);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    savedEditorRange = range.cloneRange();
+    if (lastNode.matches && lastNode.matches('figure')) {
+      selectEditorFigure(lastNode);
+    }
+  }
+}
+
+function editorTopLevelBlock(node) {
+  let current = node;
+  while (current && current.parentNode !== editor) {
+    current = current.parentNode;
+  }
+  return current && current.parentNode === editor ? current : null;
+}
+
 function editorElementSibling(node, direction) {
-  let sibling = direction === 'previous' ? node.previousSibling : node.nextSibling;
+  const topLevel = editorTopLevelBlock(node) || node;
+  let sibling = direction === 'previous' ? topLevel.previousSibling : topLevel.nextSibling;
   while (sibling && sibling.nodeType === Node.TEXT_NODE && sibling.textContent.trim() === '') {
     sibling = direction === 'previous' ? sibling.previousSibling : sibling.nextSibling;
   }
@@ -450,7 +505,7 @@ imageDownButton.addEventListener('click', () => {
   if (!selectedFigure) return;
   const next = editorElementSibling(selectedFigure, 'next');
   if (!next) return;
-  editor.insertBefore(next, selectedFigure);
+  editor.insertBefore(selectedFigure, next.nextSibling);
   selectEditorFigure(selectedFigure);
   saveEditorSelection();
 });
@@ -479,11 +534,17 @@ document.getElementById('sectionLinkButton').addEventListener('click', () => {
   editorCommand('createLink', url);
 });
 
+document.getElementById('sectionEditorImageButton').addEventListener('mousedown', () => {
+  placeImageInsertMarker();
+});
+
 document.getElementById('sectionEditorImage').addEventListener('change', async function () {
-  restoreEditorSelection();
   const file = this.files[0];
   this.value = '';
-  if (!file) return;
+  if (!file) {
+    removeImageInsertMarker();
+    return;
+  }
 
   const formData = new FormData();
   formData.append('action', 'upload_editor_image');
@@ -499,9 +560,10 @@ document.getElementById('sectionEditorImage').addEventListener('change', async f
       statusEl.textContent = data.error || 'No se pudo subir la imagen.';
       return;
     }
-    insertEditorHtml('<figure><img src="' + data.url + '" alt=""><figcaption></figcaption></figure>');
+    insertImageAtMarker('<figure><img src="' + data.url + '" alt=""><figcaption></figcaption></figure>');
     statusEl.textContent = 'Imagen insertada.';
   } catch (error) {
+    removeImageInsertMarker();
     statusEl.textContent = 'Error de red al subir la imagen.';
   }
 });
@@ -515,6 +577,7 @@ introInput.addEventListener('input', () => {
 });
 
 sectionForm.addEventListener('submit', () => {
+  removeImageInsertMarker();
   contentInput.value = editor.innerHTML.trim();
 });
 </script>
