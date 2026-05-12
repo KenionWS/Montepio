@@ -157,26 +157,6 @@
         </div>
     </section>
 
-    <section class="restoration-section">
-        <div class="restoration-inner">
-            <div>
-                <p class="section-label">Servicio especializado</p>
-                <h2 class="section-title">Restauraciones a medida</h2>
-                <p>Devolvemos la vida a tus muebles con tecnicas tradicionales y materiales de primera calidad. Presupuesto sin cargo.</p>
-                <div class="restoration-tags">
-                    <span class="tag">Lustre</span>
-                    <span class="tag">Retapizados</span>
-                    <span class="tag">Esterillados</span>
-                    <span class="tag">Arreglos en general</span>
-                    <span class="tag">Dorado</span>
-                </div>
-            </div>
-            <a href="https://wa.me/5491165714568?text=Hola,%20quiero%20consultar%20por%20una%20restauracion" class="btn-primary restoration-cta" target="_blank" rel="noopener">
-                Pedir presupuesto
-            </a>
-        </div>
-    </section>
-
     <section class="about-section" id="nosotros">
         <div class="section-inner">
             <div class="about-grid">
