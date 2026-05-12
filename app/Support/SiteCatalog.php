@@ -51,6 +51,7 @@ class SiteCatalog
             'defaultProductIcon' => self::DEFAULT_PRODUCT_ICON,
             'homeHeroSlides' => $homeHeroSlides,
             'homeServiceBlocks' => $homeServiceBlocks,
+            'homeAbout' => self::fetchHomeAbout(),
             'homeContact' => self::fetchHomeContact(),
             'sitePopup' => self::fetchSitePopup(),
             'stats' => [
@@ -893,7 +894,12 @@ class SiteCatalog
                 'about_title',
                 'about_intro',
                 'about_cover_path',
-                'about_content_html'
+                'about_content_html',
+                'about_side_kicker',
+                'about_side_value',
+                'about_side_text',
+                'about_cta_text',
+                'about_cta_link'
             )
         ")->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -905,6 +911,55 @@ class SiteCatalog
             'intro' => trim((string)($rows['about_intro'] ?? 'Una version extendida de nuestra historia, el oficio y la forma en que trabajamos cada pieza.')),
             'cover_url' => $coverPath !== '' ? self::baseUrl() . '/' . ltrim($coverPath, '/') : null,
             'content_html' => trim((string)($rows['about_content_html'] ?? $defaultContent)) ?: $defaultContent,
+            'side_kicker' => trim((string)($rows['about_side_kicker'] ?? 'Desde')),
+            'side_value' => trim((string)($rows['about_side_value'] ?? '1985')),
+            'side_text' => trim((string)($rows['about_side_text'] ?? 'Una casa dedicada a antiguedades, restauracion, alquileres y piezas con historia.')),
+            'cta_text' => trim((string)($rows['about_cta_text'] ?? 'Hablar por WhatsApp')),
+            'cta_link' => trim((string)($rows['about_cta_link'] ?? 'https://wa.me/5491165714568')),
+        ];
+    }
+
+    private static function fetchHomeAbout(): array
+    {
+        $defaults = [
+            'image_path' => 'assets/brand/fachada-montepio.jpg',
+            'kicker' => 'Quienes somos',
+            'title' => 'Una casa con historia en Buenos Aires',
+            'description' => 'Desde 1985 nos especializamos en la compra, venta, alquiler y restauracion de antiguedades y muebles unicos en el corazon de Flores, CABA.',
+            'list' => "Mas de 40 anos en el rubro\nTasacion de piezas sin cargo\nTaller propio de restauracion\nAlquiler para filmaciones y eventos\nVentas presenciales y online",
+            'button_text' => 'Contactanos',
+            'button_link' => '/quienes-somos',
+            'badge_value' => '40+',
+            'badge_text' => "anos de\nhistoria",
+        ];
+
+        $keys = array_map(static fn(string $key): string => 'home_about_' . $key, array_keys($defaults));
+        $db = self::db();
+        $placeholders = implode(',', array_fill(0, count($keys), '?'));
+        $stmt = $db->prepare("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ($placeholders)");
+        $stmt->execute($keys);
+        $rows = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        $data = [];
+        foreach ($defaults as $key => $value) {
+            $data[$key] = trim((string)($rows['home_about_' . $key] ?? $value));
+        }
+
+        $buttonLink = $data['button_link'];
+        if ($buttonLink !== '' && str_starts_with($buttonLink, '/')) {
+            $buttonLink = self::baseUrl() . $buttonLink;
+        }
+
+        return [
+            'image_url' => $data['image_path'] !== '' ? self::baseUrl() . '/' . ltrim($data['image_path'], '/') : null,
+            'kicker' => $data['kicker'],
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'list_items' => array_values(array_filter(array_map('trim', preg_split('/\R/', $data['list']) ?: []))),
+            'button_text' => $data['button_text'],
+            'button_link' => $buttonLink,
+            'badge_value' => $data['badge_value'],
+            'badge_text' => $data['badge_text'],
         ];
     }
 

@@ -11,7 +11,8 @@
     $footerBackUrl = $siteBase . '/';
     $footerBackLabel = 'Volver al inicio';
     $heroSlides = !empty($homeHeroSlides) ? $homeHeroSlides : [];
-    $heroImageAbout = $baseUrl . '/assets/brand/fachada-montepio.jpg';
+    $homeAboutBlock = $homeAbout ?? [];
+    $heroImageAbout = $homeAboutBlock['image_url'] ?? ($baseUrl . '/assets/brand/fachada-montepio.jpg');
     $heroCategories = !empty($navCategories) ? $navCategories : $categories;
     $instagramUrl = 'https://www.instagram.com/';
     $serviceCards = !empty($homeServiceBlocks) ? $homeServiceBlocks : [];
@@ -167,24 +168,24 @@
                         <img src="{{ $heroImageAbout }}" alt="Montepio Antiguedades">
                     </div>
                     <div class="about-badge">
-                        <span class="years">40+</span>
-                        <span class="of-exp">anos de<br>historia</span>
+                        <span class="years">{{ $homeAboutBlock['badge_value'] ?? '40+' }}</span>
+                        <span class="of-exp">{!! nl2br(e($homeAboutBlock['badge_text'] ?? "anos de\nhistoria")) !!}</span>
                     </div>
                 </div>
                 <div class="about-content">
-                    <p class="section-label">Quienes somos</p>
-                    <h2 class="section-title">Una casa con historia en Buenos Aires</h2>
+                    <p class="section-label">{{ $homeAboutBlock['kicker'] ?? 'Quienes somos' }}</p>
+                    <h2 class="section-title">{{ $homeAboutBlock['title'] ?? 'Una casa con historia en Buenos Aires' }}</h2>
                     <p class="section-desc">
-                        Desde 1985 nos especializamos en la compra, venta, alquiler y restauracion de antiguedades y muebles unicos en el corazon de Flores, CABA.
+                        {{ $homeAboutBlock['description'] ?? 'Desde 1985 nos especializamos en la compra, venta, alquiler y restauracion de antiguedades y muebles unicos en el corazon de Flores, CABA.' }}
                     </p>
                     <ul class="info-list">
-                        <li><span class="dot"></span>Mas de 40 anos en el rubro</li>
-                        <li><span class="dot"></span>Tasacion de piezas sin cargo</li>
-                        <li><span class="dot"></span>Taller propio de restauracion</li>
-                        <li><span class="dot"></span>Alquiler para filmaciones y eventos</li>
-                        <li><span class="dot"></span>Ventas presenciales y online</li>
+                        @foreach (($homeAboutBlock['list_items'] ?? []) as $item)
+                            <li><span class="dot"></span>{{ $item }}</li>
+                        @endforeach
                     </ul>
-                    <a href="{{ $siteBase }}/quienes-somos" class="btn-green">Contactanos</a>
+                    @if (!empty($homeAboutBlock['button_text']) && !empty($homeAboutBlock['button_link']))
+                        <a href="{{ $homeAboutBlock['button_link'] }}" class="btn-green">{{ $homeAboutBlock['button_text'] }}</a>
+                    @endif
                 </div>
             </div>
         </div>

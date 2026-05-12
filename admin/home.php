@@ -91,6 +91,43 @@ function contact_admin_save_setting(PDO $db, string $key, string $value): void
     $stmt->execute([$key, $value]);
 }
 
+function home_about_defaults(): array
+{
+    return [
+        'image_path' => 'assets/brand/fachada-montepio.jpg',
+        'kicker' => 'Quienes somos',
+        'title' => 'Una casa con historia en Buenos Aires',
+        'description' => 'Desde 1985 nos especializamos en la compra, venta, alquiler y restauracion de antiguedades y muebles unicos en el corazon de Flores, CABA.',
+        'list' => "Mas de 40 anos en el rubro\nTasacion de piezas sin cargo\nTaller propio de restauracion\nAlquiler para filmaciones y eventos\nVentas presenciales y online",
+        'button_text' => 'Contactanos',
+        'button_link' => '/quienes-somos',
+        'badge_value' => '40+',
+        'badge_text' => "anos de\nhistoria",
+    ];
+}
+
+function home_about_settings(PDO $db): array
+{
+    $defaults = home_about_defaults();
+    $keys = array_map(static fn(string $key): string => 'home_about_' . $key, array_keys($defaults));
+    $placeholders = implode(',', array_fill(0, count($keys), '?'));
+    $stmt = $db->prepare("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ($placeholders)");
+    $stmt->execute($keys);
+    $rows = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+    $settings = [];
+    foreach ($defaults as $key => $value) {
+        $settings[$key] = trim((string)($rows['home_about_' . $key] ?? $value));
+    }
+
+    return $settings;
+}
+
+function home_about_save_setting(PDO $db, string $key, string $value): void
+{
+    contact_admin_save_setting($db, 'home_about_' . $key, $value);
+}
+
 function hero_admin_fetch_slides(PDO $db): array
 {
     return $db->query("
@@ -216,6 +253,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         flash_set('ok', 'Bloque Visitanos actualizado.');
         header('Location: ' . ADMIN_URL . '/home.php#visitanos-home');
+        exit;
+    }
+
+    if ($action === 'save_home_about') {
+        $settings = home_about_settings($db);
+        $aboutImagePath = trim((string)$settings['image_path']);
+        $homeAbout = [
+            'kicker' => trim((string)($_POST['home_about_kicker'] ?? '')),
+            'title' => trim((string)($_POST['home_about_title'] ?? '')),
+            'description' => trim((string)($_POST['home_about_description'] ?? '')),
+            'list' => trim((string)($_POST['home_about_list'] ?? '')),
+            'button_text' => trim((string)($_POST['home_about_button_text'] ?? '')),
+            'button_link' => trim((string)($_POST['home_about_button_link'] ?? '')),
+            'badge_value' => trim((string)($_POST['home_about_badge_value'] ?? '')),
+            'badge_text' => trim((string)($_POST['home_about_badge_text'] ?? '')),
+        ];
+
+        if ($homeAbout['kicker'] === '' || $homeAbout['title'] === '' || $homeAbout['description'] === '' || $homeAbout['badge_value'] === '' || $homeAbout['badge_text'] === '') {
+            flash_set('err', 'La seccion Quienes somos de la home necesita etiqueta, titulo, texto y datos del circulo.');
+            header('Location: ' . ADMIN_URL . '/home.php#quienes-home');
+            exit;
+        }
+
+        if (!hero_admin_link_is_valid($homeAbout['button_link'])) {
+            flash_set('err', 'El link del boton de Quienes somos no es valido.');
+            header('Location: ' . ADMIN_URL . '/home.php#quienes-home');
+            exit;
+        }
+
+        if (isset($_FILES['home_about_image']) && (int)($_FILES['home_about_image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+            if ((int)($_FILES['home_about_image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file($_FILES['home_about_image']['tmp_name'])) {
+                flash_set('err', 'No se pudo subir la imagen de Quienes somos.');
+                header('Location: ' . ADMIN_URL . '/home.php#quienes-home');
+                exit;
+            }
+
+            $validationError = null;
+            if (!image_validate_upload($_FILES['home_about_image']['tmp_name'], (int)$_FILES['home_about_image']['size'], $validationError)) {
+                flash_set('err', 'La imagen de Quienes somos no es valida: ' . $validationError . '.');
+                header('Location: ' . ADMIN_URL . '/home.php#quienes-home');
+                exit;
+            }
+
+            $processedPath = image_process_home_service($_FILES['home_about_image']['tmp_name']);
+            if ($processedPath === false) {
+                flash_set('err', 'No se pudo procesar la imagen de Quienes somos.');
+                header('Location: ' . ADMIN_URL . '/home.php#quienes-home');
+                exit;
+            }
+
+            if ($aboutImagePath !== '' && hero_admin_is_managed_upload($aboutImagePath)) {
+                $oldFile = ROOT_PATH . '/' . ltrim($aboutImagePath, '/');
+                if (is_file($oldFile)) {
+                    @unlink($oldFile);
+                }
+            }
+
+            $aboutImagePath = $processedPath;
+        }
+
+        home_about_save_setting($db, 'image_path', $aboutImagePath);
+        foreach ($homeAbout as $key => $value) {
+            home_about_save_setting($db, $key, $value);
+        }
+
+        flash_set('ok', 'Quienes somos de la home actualizado.');
+        header('Location: ' . ADMIN_URL . '/home.php#quienes-home');
         exit;
     }
 
@@ -536,6 +640,8 @@ $formData = [
 ];
 
 $heroImageUrl = $formData['image_path'] !== '' ? BASE_URL . '/' . ltrim($formData['image_path'], '/') : '';
+$homeAboutSettings = home_about_settings($db);
+$homeAboutImageUrl = $homeAboutSettings['image_path'] !== '' ? BASE_URL . '/' . ltrim($homeAboutSettings['image_path'], '/') : '';
 $contactSettings = contact_admin_settings($db);
 $serviceFormData = [
     'id' => (int)($editingService['id'] ?? 0),
@@ -553,6 +659,7 @@ $topbarActions = [
     ['href' => BASE_URL . '/', 'label' => 'Ver home', 'class' => 'btn btn-outline btn-sm'],
     ['href' => ADMIN_URL . '/home.php#slides-home', 'label' => 'Slides', 'class' => 'btn btn-outline btn-sm'],
     ['href' => ADMIN_URL . '/home.php#servicios-home', 'label' => 'Bloques', 'class' => 'btn btn-outline btn-sm'],
+    ['href' => ADMIN_URL . '/home.php#quienes-home', 'label' => 'Quienes somos', 'class' => 'btn btn-outline btn-sm'],
     ['href' => ADMIN_URL . '/home.php#visitanos-home', 'label' => 'Visitanos', 'class' => 'btn btn-outline btn-sm'],
 ];
 
@@ -575,6 +682,7 @@ layout_sidebar('home.php');
 <div class="home-admin-nav">
   <a href="#slides-home" class="home-admin-nav-link">Slides del hero</a>
   <a href="#servicios-home" class="home-admin-nav-link">Bloques de servicios</a>
+  <a href="#quienes-home" class="home-admin-nav-link">Quienes somos</a>
   <a href="#visitanos-home" class="home-admin-nav-link">Visitanos</a>
 </div>
 
@@ -853,6 +961,104 @@ layout_sidebar('home.php');
 
 </section>
 
+<section class="home-admin-section" id="quienes-home">
+  <div class="home-admin-section-head">
+    <div>
+      <span class="section-kicker">Home</span>
+      <h2>Quienes somos</h2>
+      <p>Edicion de la franja de la home, incluida la imagen, lista, boton y circulo de anos.</p>
+    </div>
+  </div>
+
+  <div class="home-admin-grid">
+    <div class="card">
+      <div class="card-header">
+        <h3>Contenido de la home</h3>
+        <span class="text-sm text-m">Imagen, textos y CTA</span>
+      </div>
+      <div class="card-body">
+        <form method="POST" enctype="multipart/form-data" class="form-grid">
+          <?= csrf_input() ?>
+          <input type="hidden" name="action" value="save_home_about">
+
+          <?php if ($homeAboutImageUrl !== ''): ?>
+            <div class="form-group form-full">
+              <label>Imagen actual</label>
+              <div class="service-admin-preview">
+                <img src="<?= h($homeAboutImageUrl) ?>" alt="Vista previa Quienes somos">
+              </div>
+            </div>
+          <?php endif; ?>
+
+          <div class="form-group form-full">
+            <label for="home_about_image">Imagen</label>
+            <input type="file" id="home_about_image" name="home_about_image" accept="image/*">
+            <span class="form-hint">Si no subis una nueva, se mantiene la actual.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="home_about_kicker">Etiqueta</label>
+            <input type="text" id="home_about_kicker" name="home_about_kicker" value="<?= h($homeAboutSettings['kicker']) ?>">
+          </div>
+
+          <div class="form-group">
+            <label for="home_about_title">Titulo</label>
+            <input type="text" id="home_about_title" name="home_about_title" value="<?= h($homeAboutSettings['title']) ?>">
+          </div>
+
+          <div class="form-group form-full">
+            <label for="home_about_description">Texto principal</label>
+            <textarea id="home_about_description" name="home_about_description" rows="4"><?= h($homeAboutSettings['description']) ?></textarea>
+          </div>
+
+          <div class="form-group form-full">
+            <label for="home_about_list">Lista</label>
+            <textarea id="home_about_list" name="home_about_list" rows="6"><?= h($homeAboutSettings['list']) ?></textarea>
+            <span class="form-hint">Un item por linea.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="home_about_button_text">Boton: texto</label>
+            <input type="text" id="home_about_button_text" name="home_about_button_text" value="<?= h($homeAboutSettings['button_text']) ?>">
+          </div>
+
+          <div class="form-group">
+            <label for="home_about_button_link">Boton: link</label>
+            <input type="text" id="home_about_button_link" name="home_about_button_link" value="<?= h($homeAboutSettings['button_link']) ?>">
+          </div>
+
+          <div class="form-group">
+            <label for="home_about_badge_value">Circulo: valor grande</label>
+            <input type="text" id="home_about_badge_value" name="home_about_badge_value" value="<?= h($homeAboutSettings['badge_value']) ?>" placeholder="40+">
+          </div>
+
+          <div class="form-group">
+            <label for="home_about_badge_text">Circulo: texto</label>
+            <textarea id="home_about_badge_text" name="home_about_badge_text" rows="2"><?= h($homeAboutSettings['badge_text']) ?></textarea>
+          </div>
+
+          <div class="form-group form-full">
+            <button type="submit" class="btn btn-primary">Guardar Quienes somos</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <aside class="card">
+      <div class="card-header">
+        <h3>Circulo actual</h3>
+        <span class="text-sm text-m">Referencia</span>
+      </div>
+      <div class="card-body">
+        <div class="about-badge-preview">
+          <strong><?= h($homeAboutSettings['badge_value']) ?></strong>
+          <span><?= nl2br(h($homeAboutSettings['badge_text'])) ?></span>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
 <section class="home-admin-section" id="visitanos-home">
   <div class="home-admin-section-head">
     <div>
@@ -928,6 +1134,9 @@ layout_sidebar('home.php');
 .services-admin-section{margin-top:0}
 .service-admin-preview{overflow:hidden;border:1px solid #ece7dd;border-radius:14px;background:var(--gray-l)}
 .service-admin-preview img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+.about-badge-preview{width:128px;height:128px;border-radius:50%;background:var(--green);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;margin:auto}
+.about-badge-preview strong{font-family:"Playfair Display",serif;font-size:36px;line-height:1}
+.about-badge-preview span{margin-top:5px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;line-height:1.2;opacity:.85}
 .contact-admin-item{padding:16px;border:1px solid #ece7dd;border-radius:12px;background:#fff}
 .contact-admin-item + .contact-admin-item{margin-top:2px}
 .contact-admin-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}

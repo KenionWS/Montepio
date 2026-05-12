@@ -38,11 +38,13 @@
 
         <aside class="about-side">
             <div class="about-side-block">
-                <span>Desde</span>
-                <strong>1985</strong>
-                <p>Una casa dedicada a antiguedades, restauracion, alquileres y piezas con historia.</p>
+                <span>{{ $aboutPage['side_kicker'] ?? 'Desde' }}</span>
+                <strong>{{ $aboutPage['side_value'] ?? '1985' }}</strong>
+                <p>{{ $aboutPage['side_text'] ?? 'Una casa dedicada a antiguedades, restauracion, alquileres y piezas con historia.' }}</p>
             </div>
-            <a href="https://wa.me/5491165714568" target="_blank" rel="noopener" class="about-contact-btn">Hablar por WhatsApp</a>
+            @if (!empty($aboutPage['cta_text']) && !empty($aboutPage['cta_link']))
+                <a href="{{ $aboutPage['cta_link'] }}" target="_blank" rel="noopener" class="about-contact-btn">{{ $aboutPage['cta_text'] }}</a>
+            @endif
         </aside>
     </main>
 @endsection

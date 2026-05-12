@@ -24,6 +24,11 @@ function about_defaults(): array
         'about_intro' => 'Una version extendida de nuestra historia, el oficio y la forma en que trabajamos cada pieza.',
         'about_cover_path' => 'assets/brand/fachada-montepio.jpg',
         'about_content_html' => about_default_content(),
+        'about_side_kicker' => 'Desde',
+        'about_side_value' => '1985',
+        'about_side_text' => 'Una casa dedicada a antiguedades, restauracion, alquileres y piezas con historia.',
+        'about_cta_text' => 'Hablar por WhatsApp',
+        'about_cta_link' => 'https://wa.me/5491165714568',
     ];
 }
 
@@ -108,10 +113,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim((string)($_POST['about_title'] ?? ''));
     $intro = trim((string)($_POST['about_intro'] ?? ''));
     $content = about_sanitize_html((string)($_POST['about_content_html'] ?? ''));
+    $sideKicker = trim((string)($_POST['about_side_kicker'] ?? ''));
+    $sideValue = trim((string)($_POST['about_side_value'] ?? ''));
+    $sideText = trim((string)($_POST['about_side_text'] ?? ''));
+    $ctaText = trim((string)($_POST['about_cta_text'] ?? ''));
+    $ctaLink = trim((string)($_POST['about_cta_link'] ?? ''));
     $coverPath = trim((string)$settings['about_cover_path']);
 
-    if ($title === '') {
-        flash_set('err', 'El titulo es obligatorio.');
+    if ($title === '' || $sideKicker === '' || $sideValue === '' || $sideText === '') {
+        flash_set('err', 'El titulo y los datos del recuadro lateral son obligatorios.');
         header('Location: ' . ADMIN_URL . '/about.php');
         exit;
     }
@@ -157,6 +167,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     about_save_setting($db, 'about_intro', $intro);
     about_save_setting($db, 'about_cover_path', $coverPath);
     about_save_setting($db, 'about_content_html', $content);
+    about_save_setting($db, 'about_side_kicker', $sideKicker);
+    about_save_setting($db, 'about_side_value', $sideValue);
+    about_save_setting($db, 'about_side_text', $sideText);
+    about_save_setting($db, 'about_cta_text', $ctaText);
+    about_save_setting($db, 'about_cta_link', $ctaLink);
 
     flash_set('ok', 'Seccion Quienes somos actualizada.');
     header('Location: ' . ADMIN_URL . '/about.php');
@@ -261,6 +276,31 @@ layout_sidebar('about.php');
           </div>
           <div class="editor-status" id="aboutEditorStatus"></div>
           <span class="form-hint">Podes dar formato al texto, agregar links e insertar imagenes dentro del contenido.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="about_side_kicker">Recuadro lateral: etiqueta</label>
+          <input type="text" id="about_side_kicker" name="about_side_kicker" value="<?= h((string)$settings['about_side_kicker']) ?>">
+        </div>
+
+        <div class="form-group">
+          <label for="about_side_value">Recuadro lateral: valor grande</label>
+          <input type="text" id="about_side_value" name="about_side_value" value="<?= h((string)$settings['about_side_value']) ?>">
+        </div>
+
+        <div class="form-group form-full">
+          <label for="about_side_text">Recuadro lateral: texto</label>
+          <textarea id="about_side_text" name="about_side_text" rows="3"><?= h((string)$settings['about_side_text']) ?></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="about_cta_text">Boton lateral: texto</label>
+          <input type="text" id="about_cta_text" name="about_cta_text" value="<?= h((string)$settings['about_cta_text']) ?>">
+        </div>
+
+        <div class="form-group">
+          <label for="about_cta_link">Boton lateral: link</label>
+          <input type="text" id="about_cta_link" name="about_cta_link" value="<?= h((string)$settings['about_cta_link']) ?>">
         </div>
 
         <div class="form-group form-full">
