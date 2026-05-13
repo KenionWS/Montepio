@@ -56,7 +56,7 @@ $stmt = $db->prepare("
 $stmt->execute([...$params, $perPage, $offset]);
 $products = $stmt->fetchAll();
 
-$categories = $db->query("SELECT * FROM categories ORDER BY position, name")->fetchAll();
+$categories = $db->query("SELECT * FROM categories ORDER BY LOWER(name), name")->fetchAll();
 
 layout_head('Dashboard');
 layout_sidebar('dashboard.php');

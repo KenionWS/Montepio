@@ -123,7 +123,7 @@ $allCats = $db->query('
     FROM categories c
     LEFT JOIN product_categories pc ON pc.category_id = c.id
     GROUP BY c.id
-    ORDER BY c.position, c.name
+    ORDER BY LOWER(c.name), c.name
 ')->fetchAll();
 
 $parents = array_values(array_filter($allCats, static fn(array $c): bool => $c['parent_id'] === null));

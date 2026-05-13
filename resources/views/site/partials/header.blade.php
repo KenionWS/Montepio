@@ -143,6 +143,40 @@
 
 @if (!empty($navCategories))
     <script>
+        function positionDesktopSubmenu(item) {
+            if (window.matchMedia('(max-width: 640px)').matches) {
+                return;
+            }
+
+            var nav = item.closest('.site-nav');
+            var link = item.querySelector(':scope > a');
+            var submenu = item.querySelector(':scope > .submenu');
+            if (!nav || !link || !submenu) {
+                return;
+            }
+
+            var navRect = nav.getBoundingClientRect();
+            var linkRect = link.getBoundingClientRect();
+            var top = Math.round((linkRect.bottom - navRect.top));
+            submenu.style.setProperty('--submenu-top', top + 'px');
+        }
+
+        document.querySelectorAll('.site-nav .nav-item').forEach(function (item) {
+            item.addEventListener('mouseenter', function () {
+                positionDesktopSubmenu(item);
+            });
+
+            item.addEventListener('focusin', function () {
+                positionDesktopSubmenu(item);
+            });
+        });
+
+        window.addEventListener('resize', function () {
+            document.querySelectorAll('.site-nav .nav-item').forEach(function (item) {
+                positionDesktopSubmenu(item);
+            });
+        });
+
         document.querySelectorAll('.site-nav .nav-item > a').forEach(function (link) {
             link.addEventListener('click', function (event) {
                 if (!window.matchMedia('(max-width: 640px)').matches) {

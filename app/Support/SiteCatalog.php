@@ -25,7 +25,7 @@ class SiteCatalog
 
         $categoryTree = self::fetchCategoryTree();
         $categories = $categoryTree;
-        usort($categories, static fn(array $a, array $b): int => ($b['product_count'] <=> $a['product_count']) ?: strcmp((string)$a['name'], (string)$b['name']));
+        usort($categories, static fn(array $a, array $b): int => strcasecmp((string)$a['name'], (string)$b['name']));
         $categories = array_slice($categories, 0, 6);
 
         return [
@@ -103,7 +103,7 @@ class SiteCatalog
 
         $categorySql .= "
             GROUP BY c.id
-            ORDER BY c.parent_id IS NOT NULL, c.position, c.name
+            ORDER BY LOWER(c.name), c.name
         ";
 
         $categoryStmt = $db->prepare($categorySql);
@@ -521,7 +521,7 @@ class SiteCatalog
             LEFT JOIN product_categories pc ON pc.category_id = c.id
             LEFT JOIN products p ON p.id = pc.product_id AND p.status = 'activo'
             GROUP BY c.id
-            ORDER BY c.position, c.name
+            ORDER BY LOWER(c.name), c.name
         ")->fetchAll(PDO::FETCH_ASSOC);
 
         return self::buildCategoryTree($rows);

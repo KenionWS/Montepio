@@ -29,7 +29,7 @@ if ($isEdit) {
     $images = $imgStmt->fetchAll();
 }
 
-$categories = $db->query("SELECT * FROM categories ORDER BY parent_id NULLS FIRST, position, name")->fetchAll();
+$categories = $db->query("SELECT * FROM categories ORDER BY LOWER(name), name")->fetchAll();
 $pageTitle = $isEdit ? 'Editar: ' . ($p['title'] ?? '') : 'Nuevo producto';
 
 $selectedCatIds = [];

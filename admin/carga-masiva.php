@@ -9,7 +9,7 @@ require_once __DIR__ . '/lib/layout.php';
 
 auth_require();
 
-$categories = db()->query("SELECT * FROM categories ORDER BY parent_id NULLS FIRST, position, name")->fetchAll();
+$categories = db()->query("SELECT * FROM categories ORDER BY LOWER(name), name")->fetchAll();
 $catParents = array_filter($categories, fn($c) => $c['parent_id'] === null);
 $catChildren = [];
 foreach ($categories as $c) {
