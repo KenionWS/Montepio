@@ -7,6 +7,7 @@
     $catalogUrl = $siteBase . '/catalogo';
     $activeNavParentSlug = $parentCategory['slug'];
     $activeNavChildSlug = $activeChild['slug'] ?? null;
+    $categoryTrail = $breadcrumbs ?? [$parentCategory, $currentCategory];
     $footerBackUrl = $siteBase . '/';
     $footerBackLabel = 'Volver al inicio';
     $heroCategory = $activeChild ?? $currentCategory;
@@ -21,12 +22,16 @@
     <div class="breadcrumb-bar">
         <div class="breadcrumb-inner">
             <a href="{{ $siteBase }}/">Inicio</a>
-            <span>›</span>
+            <span>></span>
             <a href="{{ $catalogUrl }}">Catalogo</a>
-            <span>›</span>
-            <a href="{{ $parentCategory['url'] }}">{{ $parentCategory['name'] }}</a>
-            <span>›</span>
-            <span class="current">{{ $currentCategory['name'] }}</span>
+            @foreach ($categoryTrail as $trailCategory)
+                <span>></span>
+                @if ($loop->last)
+                    <span class="current">{{ $trailCategory['name'] }}</span>
+                @else
+                    <a href="{{ $trailCategory['url'] }}">{{ $trailCategory['name'] }}</a>
+                @endif
+            @endforeach
         </div>
     </div>
 
@@ -36,14 +41,17 @@
             <div class="cat-hero-text">
                 <div class="cat-hero-tag">{{ $activeChild ? 'Subcategoria' : 'Categoria' }}</div>
                 <h1>{{ $currentCategory['name'] }}</h1>
+                @if ($currentCategory['description'] !== '')
+                    <p>{{ $currentCategory['description'] }}</p>
+                @endif
                 <p>{{ $productsCount }} pieza(s) publicadas en esta seccion del catalogo.</p>
             </div>
 
             @if (!empty($children))
                 <div class="cat-hero-subcats">
-                    <a href="{{ $parentCategory['url'] }}" class="subcat-pill {{ $activeChild === null ? 'active' : '' }}">Todo</a>
+                    <a href="{{ $currentCategory['url'] }}" class="subcat-pill active">Todo</a>
                     @foreach ($children as $child)
-                        <a href="{{ $child['url'] }}" class="subcat-pill {{ ($activeChild['slug'] ?? null) === $child['slug'] ? 'active' : '' }}">
+                        <a href="{{ $child['url'] }}" class="subcat-pill">
                             {{ $child['name'] }}
                         </a>
                     @endforeach
@@ -56,19 +64,19 @@
         <aside class="sidebar">
             <div class="filter-block">
                 <div class="filter-header">
-                    <h4>Subcategoria</h4>
+                    <h4>Subcategorias</h4>
                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </div>
                 <div class="filter-body">
-                    <a href="{{ $parentCategory['url'] }}" class="filter-option {{ $activeChild === null ? 'active' : '' }}">
+                    <a href="{{ $currentCategory['url'] }}" class="filter-option active">
                         <span>Todo</span>
                         <span class="filter-count">{{ $productsCount }}</span>
                     </a>
 
                     @forelse ($children as $child)
-                        <a href="{{ $child['url'] }}" class="filter-option {{ ($activeChild['slug'] ?? null) === $child['slug'] ? 'active' : '' }}">
+                        <a href="{{ $child['url'] }}" class="filter-option">
                             <span>{{ $child['name'] }}</span>
                             <span class="filter-count">{{ $child['product_count'] }}</span>
                         </a>
@@ -82,7 +90,7 @@
             </div>
 
             <div class="sidebar-clear">
-                <a href="{{ $parentCategory['url'] }}">Limpiar filtros</a>
+                <a href="{{ $currentCategory['url'] }}">Limpiar filtros</a>
             </div>
         </aside>
 
@@ -124,7 +132,7 @@
                         </div>
 
                         <div class="product-info">
-                            <span class="product-subcat">{{ $activeChild['name'] ?? $product['category_name'] ?? $currentCategory['name'] }}</span>
+                            <span class="product-subcat">{{ $product['category_name'] ?? $currentCategory['name'] }}</span>
                             <span class="product-name">{{ $product['title'] }}</span>
                             <span class="product-desc">
                                 {{ $product['description'] !== '' ? \Illuminate\Support\Str::limit($product['description'], 100) : 'Producto cargado desde el administrador.' }}

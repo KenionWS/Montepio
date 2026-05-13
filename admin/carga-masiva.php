@@ -18,6 +18,41 @@ foreach ($categories as $c) {
     }
 }
 
+function render_bulk_category_node(array $category, array $childrenByParent, int $level = 0): void
+{
+    $children = $childrenByParent[$category['id']] ?? [];
+    $hasChildren = !empty($children);
+    $typeLabel = $level === 0 ? 'categoria principal' : 'nivel ' . ($level + 1);
+    ?>
+    <div class="bulk-category-node" style="--cat-level: <?= $level ?>">
+      <div class="bulk-category-row">
+        <?php if ($hasChildren): ?>
+          <button type="button"
+                  class="bulk-category-toggle"
+                  data-category-toggle
+                  aria-expanded="false"
+                  aria-controls="bulk-category-children-<?= (int)$category['id'] ?>">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"></path></svg>
+          </button>
+        <?php else: ?>
+          <span class="bulk-category-spacer"></span>
+        <?php endif; ?>
+        <label class="bulk-category-label <?= $level === 0 ? 'is-parent' : '' ?>">
+          <input type="checkbox" class="bulk-category-checkbox" value="<?= (int)$category['id'] ?>">
+          <?= h($category['name']) ?> <small><?= h($typeLabel) ?></small>
+        </label>
+      </div>
+      <?php if ($hasChildren): ?>
+        <div id="bulk-category-children-<?= (int)$category['id'] ?>" class="bulk-category-children">
+          <?php foreach ($children as $child): ?>
+            <?php render_bulk_category_node($child, $childrenByParent, $level + 1); ?>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+    <?php
+}
+
 layout_head('Carga masiva', <<<CSS
 <style>
 .upload-area {
@@ -224,7 +259,8 @@ layout_head('Carga masiva', <<<CSS
 .bulk-category-label.is-parent { font-weight: 600; }
 .bulk-category-label input { width: auto; margin: 0; accent-color: var(--green); }
 .bulk-category-label small { color: var(--gray-m); font-weight: 400; }
-.bulk-category-children { display: none; padding: 4px 0 4px 34px; }
+.bulk-category-node { padding-left: calc(var(--cat-level) * 14px); }
+.bulk-category-children { display: none; padding: 4px 0 4px 20px; }
 .bulk-category-children.is-open { display: block; }
 .bulk-category-children .bulk-category-label { padding: 4px 0; color: var(--gray-d); }
 
@@ -266,35 +302,8 @@ layout_sidebar('carga-masiva.php');
         <div class="bulk-category-empty">No hay categorias cargadas.</div>
       <?php else: ?>
         <?php foreach ($catParents as $parent): ?>
-          <?php $children = $catChildren[$parent['id']] ?? []; ?>
           <div class="bulk-category-group">
-            <div class="bulk-category-row">
-              <?php if (!empty($children)): ?>
-                <button type="button"
-                        class="bulk-category-toggle"
-                        data-category-toggle
-                        aria-expanded="false"
-                        aria-controls="bulk-category-children-<?= $parent['id'] ?>">
-                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"></path></svg>
-                </button>
-              <?php else: ?>
-                <span class="bulk-category-spacer"></span>
-              <?php endif; ?>
-              <label class="bulk-category-label is-parent">
-                <input type="checkbox" class="bulk-category-checkbox" value="<?= $parent['id'] ?>">
-                <?= h($parent['name']) ?> <small>categoria principal</small>
-              </label>
-            </div>
-            <?php if (!empty($children)): ?>
-              <div id="bulk-category-children-<?= $parent['id'] ?>" class="bulk-category-children">
-                <?php foreach ($children as $child): ?>
-                  <label class="bulk-category-label">
-                    <input type="checkbox" class="bulk-category-checkbox" value="<?= $child['id'] ?>">
-                    <?= h($child['name']) ?> <small>subcategoria</small>
-                  </label>
-                <?php endforeach; ?>
-              </div>
-            <?php endif; ?>
+            <?php render_bulk_category_node($parent, $catChildren); ?>
           </div>
         <?php endforeach; ?>
       <?php endif; ?>

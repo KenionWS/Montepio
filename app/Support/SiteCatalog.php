@@ -23,27 +23,10 @@ class SiteCatalog
             WHERE status = 'activo'
         ")->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $categories = $db->query("
-            SELECT
-                c.id,
-                c.name,
-                c.slug,
-                c.icon,
-                c.cover_path,
-                c.description,
-                c.show_in_menu,
-                c.parent_id,
-                parent.slug AS parent_slug,
-                COUNT(DISTINCT p.id) AS product_count
-            FROM categories c
-            LEFT JOIN categories parent ON parent.id = c.parent_id
-            LEFT JOIN product_categories pc ON pc.category_id = c.id
-            LEFT JOIN products p ON p.id = pc.product_id AND p.status = 'activo'
-            WHERE c.parent_id IS NULL
-            GROUP BY c.id
-            ORDER BY product_count DESC, c.position, c.name
-            LIMIT 6
-        ")->fetchAll(PDO::FETCH_ASSOC);
+        $categoryTree = self::fetchCategoryTree();
+        $categories = $categoryTree;
+        usort($categories, static fn(array $a, array $b): int => ($b['product_count'] <=> $a['product_count']) ?: strcmp((string)$a['name'], (string)$b['name']));
+        $categories = array_slice($categories, 0, 6);
 
         return [
             'baseUrl' => self::baseUrl(),
@@ -59,8 +42,8 @@ class SiteCatalog
                 'featured_products' => (int)($stats['featured_products'] ?? 0),
                 'total_categories' => count($categories),
             ],
-            'categories' => array_map([self::class, 'mapCategory'], $categories),
-            'navCategories' => self::fetchCategoryTree(),
+            'categories' => $categories,
+            'navCategories' => $categoryTree,
             'featuredProducts' => self::fetchProducts("
                 WHERE p.status = 'activo'
                 ORDER BY p.is_featured DESC, p.created_at DESC, p.id DESC
@@ -126,6 +109,16 @@ class SiteCatalog
         $categoryStmt = $db->prepare($categorySql);
         $categoryStmt->execute($categoryParams);
         $categories = $categoryStmt->fetchAll(PDO::FETCH_ASSOC);
+        $categories = self::flattenCategories(self::fetchCategoryTree());
+        if ($search !== '') {
+            $needle = function_exists('mb_strtolower') ? mb_strtolower($search) : strtolower($search);
+            $categories = array_values(array_filter($categories, static function (array $category) use ($needle): bool {
+                $haystack = (string)$category['name'] . ' ' . (string)($category['description'] ?? '');
+                $haystack = function_exists('mb_strtolower') ? mb_strtolower($haystack) : strtolower($haystack);
+
+                return str_contains($haystack, $needle);
+            }));
+        }
 
         return [
             'baseUrl' => self::baseUrl(),
@@ -133,7 +126,7 @@ class SiteCatalog
             'defaultProductIcon' => self::DEFAULT_PRODUCT_ICON,
             'navCategories' => self::fetchCategoryTree(),
             'sitePopup' => self::fetchSitePopup(),
-            'categories' => array_map([self::class, 'mapCategory'], $categories),
+            'categories' => $categories,
             'products' => self::fetchProducts("
                 WHERE p.status = 'activo'" . ($search !== '' ? "
                   AND (
@@ -149,78 +142,21 @@ class SiteCatalog
 
     public static function categoryViewData(string $categorySlug, ?string $subCategorySlug = null): ?array
     {
-        $db = self::db();
+        $segments = array_values(array_filter(explode('/', trim($categorySlug, '/')), static fn(string $part): bool => $part !== ''));
+        if ($subCategorySlug !== null && $subCategorySlug !== '') {
+            $segments[] = $subCategorySlug;
+        }
 
-        $parentStmt = $db->prepare("
-            SELECT
-                c.id,
-                c.name,
-                c.slug,
-                c.icon,
-                c.cover_path,
-                c.description,
-                c.show_in_menu,
-                c.parent_id,
-                NULL AS parent_slug,
-                COUNT(DISTINCT p.id) AS product_count
-            FROM categories c
-            LEFT JOIN product_categories pc ON pc.category_id = c.id
-            LEFT JOIN products p ON p.id = pc.product_id AND p.status = 'activo'
-            WHERE c.slug = ? AND c.parent_id IS NULL
-            GROUP BY c.id
-            LIMIT 1
-        ");
-        $parentStmt->execute([$categorySlug]);
-        $parent = $parentStmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$parent) {
+        $breadcrumbs = self::findCategoryPath(self::fetchCategoryTree(), $segments);
+        if ($breadcrumbs === null || empty($breadcrumbs)) {
             return null;
         }
 
-        $childrenStmt = $db->prepare("
-            SELECT
-                c.id,
-                c.name,
-                c.slug,
-                c.icon,
-                c.cover_path,
-                c.description,
-                c.show_in_menu,
-                c.parent_id,
-                parent.slug AS parent_slug,
-                COUNT(DISTINCT p.id) AS product_count
-            FROM categories c
-            LEFT JOIN categories parent ON parent.id = c.parent_id
-            LEFT JOIN product_categories pc ON pc.category_id = c.id
-            LEFT JOIN products p ON p.id = pc.product_id AND p.status = 'activo'
-            WHERE c.parent_id = ?
-            GROUP BY c.id
-            ORDER BY c.position, c.name
-        ");
-        $childrenStmt->execute([(int)$parent['id']]);
-        $children = array_map([self::class, 'mapCategory'], $childrenStmt->fetchAll(PDO::FETCH_ASSOC));
-
-        $parentCategory = self::mapCategory($parent);
-        $currentCategory = $parentCategory;
-        $activeChild = null;
-
-        if ($subCategorySlug !== null) {
-            foreach ($children as $child) {
-                if ($child['slug'] === $subCategorySlug) {
-                    $activeChild = $child;
-                    $currentCategory = $child;
-                    break;
-                }
-            }
-
-            if (!$activeChild) {
-                return null;
-            }
-        }
-
-        $categoryIds = $activeChild
-            ? [$activeChild['id']]
-            : array_values(array_unique(array_merge([$parentCategory['id']], array_column($children, 'id'))));
+        $parentCategory = $breadcrumbs[0];
+        $currentCategory = $breadcrumbs[count($breadcrumbs) - 1];
+        $activeChild = count($breadcrumbs) > 1 ? $currentCategory : null;
+        $children = $currentCategory['children'] ?? [];
+        $categoryIds = self::collectCategoryIds($currentCategory);
 
         $products = self::fetchProductsForCategoryIds($categoryIds);
 
@@ -233,6 +169,7 @@ class SiteCatalog
             'parentCategory' => $parentCategory,
             'currentCategory' => $currentCategory,
             'activeChild' => $activeChild,
+            'breadcrumbs' => $breadcrumbs,
             'children' => $children,
             'products' => $products,
             'productsCount' => count($products),
@@ -304,13 +241,10 @@ class SiteCatalog
             ];
         }, $imagesStmt->fetchAll(PDO::FETCH_ASSOC));
 
-        $relatedIds = [];
-        if (!empty($product['category_id'])) {
-            $relatedIds[] = (int)$product['category_id'];
-        }
-        if (!empty($product['parent_category_id'])) {
-            $relatedIds[] = (int)$product['parent_category_id'];
-        }
+        $categoryPath = !empty($product['category_id']) ? self::findCategoryPathById((int)$product['category_id']) : [];
+        $primaryCategory = !empty($categoryPath) ? $categoryPath[count($categoryPath) - 1] : null;
+        $parentCategory = count($categoryPath) > 1 ? $categoryPath[0] : null;
+        $relatedIds = array_column($categoryPath, 'id');
 
         $relatedProducts = array_values(array_filter(
             self::fetchProductsForCategoryIds($relatedIds),
@@ -318,35 +252,13 @@ class SiteCatalog
         ));
         $relatedProducts = array_slice($relatedProducts, 0, 4);
 
-        $primaryCategory = null;
-        if (!empty($product['category_id'])) {
-            $primaryCategory = [
-                'id' => (int)$product['category_id'],
-                'name' => $product['category_name'],
-                'slug' => $product['category_slug'],
-                'url' => !empty($product['parent_category_slug'])
-                    ? self::baseUrl() . '/catalogo/' . rawurlencode((string)$product['parent_category_slug']) . '/' . rawurlencode((string)$product['category_slug'])
-                    : self::baseUrl() . '/catalogo/' . rawurlencode((string)$product['category_slug']),
-            ];
-        }
-
-        $parentCategory = null;
-        if (!empty($product['parent_category_id'])) {
-            $parentCategory = [
-                'id' => (int)$product['parent_category_id'],
-                'name' => $product['parent_category_name'],
-                'slug' => $product['parent_category_slug'],
-                'url' => self::baseUrl() . '/catalogo/' . rawurlencode((string)$product['parent_category_slug']),
-            ];
-        }
-
         return [
             'baseUrl' => self::baseUrl(),
             'defaultCategoryIcon' => self::DEFAULT_CATEGORY_ICON,
             'defaultProductIcon' => self::DEFAULT_PRODUCT_ICON,
             'navCategories' => self::fetchCategoryTree(),
             'sitePopup' => self::fetchSitePopup(),
-            'product' => self::mapProductDetail($product, $images, $primaryCategory, $parentCategory),
+            'product' => self::mapProductDetail($product, $images, $primaryCategory, $parentCategory, $categoryPath),
             'relatedProducts' => $relatedProducts,
         ];
     }
@@ -511,7 +423,7 @@ class SiteCatalog
         return $mapped;
     }
 
-    private static function mapProductDetail(array $product, array $images, ?array $primaryCategory, ?array $parentCategory): array
+    private static function mapProductDetail(array $product, array $images, ?array $primaryCategory, ?array $parentCategory, array $categoryPath = []): array
     {
         $priceVisible = (int)($product['price_visible'] ?? 0) === 1 && $product['price'] !== null && $product['price'] !== '';
         $priceLabel = $priceVisible ? '$' . number_format((float)$product['price'], 0, ',', '.') : 'Consultar';
@@ -554,6 +466,7 @@ class SiteCatalog
             'main_image' => $images[0] ?? null,
             'primary_category' => $primaryCategory,
             'parent_category' => $parentCategory,
+            'category_path' => $categoryPath,
             'category_badge' => $parentCategory ? ($parentCategory['name'] . ' › ' . ($primaryCategory['name'] ?? '')) : ($primaryCategory['name'] ?? 'Catalogo'),
             'url' => self::baseUrl() . '/producto/' . rawurlencode((string)$product['slug']),
         ];
@@ -563,9 +476,11 @@ class SiteCatalog
     {
         $parentId = isset($category['parent_id']) && $category['parent_id'] !== null ? (int)$category['parent_id'] : null;
         $slug = $category['slug'];
-        $url = $parentId && !empty($category['parent_slug'])
-            ? self::baseUrl() . '/catalogo/' . rawurlencode((string)$category['parent_slug']) . '/' . rawurlencode($slug)
-            : self::baseUrl() . '/catalogo/' . rawurlencode($slug);
+        $pathSlugs = $category['path_slugs'] ?? [$slug];
+        $url = self::baseUrl() . '/catalogo/' . implode('/', array_map(
+            static fn(string $pathSlug): string => rawurlencode($pathSlug),
+            $pathSlugs
+        ));
 
         return [
             'id' => (int)$category['id'],
@@ -578,6 +493,8 @@ class SiteCatalog
             'show_in_menu' => (int)($category['show_in_menu'] ?? 0) === 1,
             'product_count' => (int)($category['product_count'] ?? 0),
             'parent_id' => $parentId,
+            'depth' => (int)($category['depth'] ?? max(0, count($pathSlugs) - 1)),
+            'path_slugs' => $pathSlugs,
             'url' => $url,
         ];
     }
@@ -604,30 +521,116 @@ class SiteCatalog
             LEFT JOIN product_categories pc ON pc.category_id = c.id
             LEFT JOIN products p ON p.id = pc.product_id AND p.status = 'activo'
             GROUP BY c.id
-            ORDER BY c.parent_id IS NOT NULL, c.position, c.name
+            ORDER BY c.position, c.name
         ")->fetchAll(PDO::FETCH_ASSOC);
 
-        $parents = [];
+        return self::buildCategoryTree($rows);
+    }
+
+    private static function buildCategoryTree(array $rows): array
+    {
+        $nodes = [];
         $childrenByParent = [];
 
         foreach ($rows as $row) {
+            $nodes[(int)$row['id']] = $row;
+            $childrenByParent[(int)($row['parent_id'] ?? 0)][] = (int)$row['id'];
+        }
+
+        $build = function (int $id, array $pathSlugs = [], int $depth = 0) use (&$build, &$nodes, &$childrenByParent): array {
+            $row = $nodes[$id];
+            $pathSlugs[] = (string)$row['slug'];
+            $row['path_slugs'] = $pathSlugs;
+            $row['depth'] = $depth;
+
             $mapped = self::mapCategory($row);
+            $mapped['children'] = [];
 
-            if ($row['parent_id'] === null) {
-                $mapped['children'] = [];
-                $parents[(int)$row['id']] = $mapped;
-            } else {
-                $childrenByParent[(int)$row['parent_id']][] = $mapped;
+            foreach ($childrenByParent[$id] ?? [] as $childId) {
+                $mapped['children'][] = $build($childId, $pathSlugs, $depth + 1);
             }
+
+            $mapped['product_count'] += array_sum(array_column($mapped['children'], 'product_count'));
+
+            return $mapped;
+        };
+
+        $tree = [];
+        foreach ($childrenByParent[0] ?? [] as $rootId) {
+            $tree[] = $build($rootId);
         }
 
-        foreach ($childrenByParent as $parentId => $children) {
-            if (isset($parents[$parentId])) {
-                $parents[$parentId]['children'] = $children;
-            }
+        return $tree;
+    }
+
+    private static function findCategoryPath(array $categories, array $segments): ?array
+    {
+        if (empty($segments)) {
+            return null;
         }
 
-        return array_values($parents);
+        $path = [];
+        $level = $categories;
+        foreach ($segments as $segment) {
+            $match = null;
+            foreach ($level as $category) {
+                if ($category['slug'] === $segment) {
+                    $match = $category;
+                    break;
+                }
+            }
+
+            if ($match === null) {
+                return null;
+            }
+
+            $path[] = $match;
+            $level = $match['children'] ?? [];
+        }
+
+        return $path;
+    }
+
+    private static function flattenCategories(array $categories): array
+    {
+        $flat = [];
+        foreach ($categories as $category) {
+            $flat[] = $category;
+            $flat = array_merge($flat, self::flattenCategories($category['children'] ?? []));
+        }
+
+        return $flat;
+    }
+
+    private static function findCategoryPathById(int $categoryId): array
+    {
+        $walk = function (array $categories, array $path = []) use (&$walk, $categoryId): ?array {
+            foreach ($categories as $category) {
+                $nextPath = array_merge($path, [$category]);
+                if ((int)$category['id'] === $categoryId) {
+                    return $nextPath;
+                }
+
+                $found = $walk($category['children'] ?? [], $nextPath);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+
+            return null;
+        };
+
+        return $walk(self::fetchCategoryTree()) ?? [];
+    }
+
+    private static function collectCategoryIds(array $category): array
+    {
+        $ids = [(int)$category['id']];
+        foreach ($category['children'] ?? [] as $child) {
+            $ids = array_merge($ids, self::collectCategoryIds($child));
+        }
+
+        return array_values(array_unique($ids));
     }
 
     private static function fetchHomeHeroSlides(): array

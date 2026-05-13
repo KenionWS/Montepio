@@ -87,6 +87,23 @@
             </div>
         </div>
         <div class="nav-inner nav-inner-wrap">
+            @php
+                $renderNavChildren = function (array $items, int $depth = 0) use (&$renderNavChildren, $activeNavChildSlug) {
+                    foreach ($items as $item) {
+                        echo '<div class="submenu-tree-item submenu-tree-depth-' . $depth . '">';
+                        echo '<a href="' . e($item['url']) . '" class="submenu-link ' . (($activeNavChildSlug ?? null) === $item['slug'] ? 'active' : '') . '">';
+                        if ($depth === 0) {
+                            echo '<span class="sub-dot"></span>';
+                        }
+                        echo '<span class="submenu-link-text">' . e($item['name']) . '</span>';
+                        echo '</a>';
+                        if (!empty($item['children'])) {
+                            $renderNavChildren($item['children'], $depth + 1);
+                        }
+                        echo '</div>';
+                    }
+                };
+            @endphp
             @foreach ($navCategories as $category)
                 @php
                     $children = $category['children'] ?? [];
@@ -110,13 +127,8 @@
                             </div>
                             <div class="submenu-body">
                                 <h5>Subcategorias</h5>
-                                <div class="submenu-grid submenu-grid-full">
-                                    @foreach ($children as $child)
-                                        <a href="{{ $child['url'] }}" class="submenu-link {{ ($activeNavChildSlug ?? null) === $child['slug'] ? 'active' : '' }}">
-                                            <span class="sub-dot"></span>
-                                            <span class="submenu-link-text">{{ $child['name'] }}</span>
-                                        </a>
-                                    @endforeach
+                                <div class="submenu-tree">
+                                    {!! $renderNavChildren($children) !!}
                                 </div>
                             </div>
                         </div>

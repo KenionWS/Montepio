@@ -33,19 +33,12 @@ Route::get('/{servicePage}', function (string $servicePage) {
     return view('site.service-page', $data);
 })->where('servicePage', 'alquileres|compra-venta|restauraciones');
 
-Route::get('/catalogo/{category}', function (string $category) {
-    $data = SiteCatalog::categoryViewData($category);
+Route::get('/catalogo/{categoryPath}', function (string $categoryPath) {
+    $data = SiteCatalog::categoryViewData($categoryPath);
     abort_if($data === null, 404);
 
     return view('site.category', $data);
-});
-
-Route::get('/catalogo/{category}/{subcategory}', function (string $category, string $subcategory) {
-    $data = SiteCatalog::categoryViewData($category, $subcategory);
-    abort_if($data === null, 404);
-
-    return view('site.category', $data);
-});
+})->where('categoryPath', '.*');
 
 Route::get('/producto/{slug}', function (string $slug) {
     $data = SiteCatalog::productViewData($slug);

@@ -7,12 +7,13 @@
     $catalogUrl = $siteBase . '/catalogo';
     $parentCategory = $product['parent_category'];
     $primaryCategory = $product['primary_category'];
+    $categoryPath = $product['category_path'] ?? [];
     $galleryImages = $product['images'] ?? [];
     $mainImage = $product['main_image'];
     $isRentalOnly = !empty($product['rental_only']);
     $topBadgeUrl = $primaryCategory['url'] ?? $catalogUrl;
-    $topBadgeText = $parentCategory && $primaryCategory
-        ? ($parentCategory['name'] . ' > ' . $primaryCategory['name'])
+    $topBadgeText = !empty($categoryPath)
+        ? implode(' > ', array_column($categoryPath, 'name'))
         : ($primaryCategory['name'] ?? 'Catalogo');
     $activeNavParentSlug = $parentCategory['slug'] ?? ($primaryCategory['slug'] ?? null);
     $activeNavChildSlug = $parentCategory ? ($primaryCategory['slug'] ?? null) : null;
@@ -70,18 +71,12 @@
         <div class="breadcrumb-inner">
             <a href="{{ $siteBase }}/">Inicio</a>
             <span>></span>
-            @if ($parentCategory)
-                <a href="{{ $parentCategory['url'] }}">{{ $parentCategory['name'] }}</a>
+            <a href="{{ $catalogUrl }}">Catalogo</a>
+            <span>></span>
+            @foreach ($categoryPath as $pathCategory)
+                <a href="{{ $pathCategory['url'] }}">{{ $pathCategory['name'] }}</a>
                 <span>></span>
-            @else
-                <a href="{{ $catalogUrl }}">Catalogo</a>
-                <span>></span>
-            @endif
-
-            @if ($primaryCategory)
-                <a href="{{ $primaryCategory['url'] }}">{{ $primaryCategory['name'] }}</a>
-                <span>></span>
-            @endif
+            @endforeach
 
             <span class="current">{{ $product['title'] }}</span>
         </div>

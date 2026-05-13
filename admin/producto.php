@@ -47,6 +47,58 @@ foreach ($categories as $c) {
     }
 }
 
+function product_category_has_selected_descendant(array $category, array $childrenByParent, array $selectedIds): bool
+{
+    foreach ($childrenByParent[$category['id']] ?? [] as $child) {
+        if (in_array($child['id'], $selectedIds)) {
+            return true;
+        }
+        if (product_category_has_selected_descendant($child, $childrenByParent, $selectedIds)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function render_product_category_node(array $category, array $childrenByParent, array $selectedIds, int $level = 0): void
+{
+    $children = $childrenByParent[$category['id']] ?? [];
+    $hasChildren = !empty($children);
+    $isExpanded = product_category_has_selected_descendant($category, $childrenByParent, $selectedIds);
+    $labelClass = $level === 0 ? 'category-parent-label' : 'category-child-label';
+    $rowClass = $level === 0 ? 'category-parent-row' : 'category-parent-row category-child-row';
+    $typeLabel = $level === 0 ? 'categoria principal' : 'nivel ' . ($level + 1);
+    ?>
+    <div class="category-node" style="--cat-level: <?= $level ?>">
+      <div class="<?= $rowClass ?>">
+        <?php if ($hasChildren): ?>
+          <button type="button"
+                  class="category-parent-toggle"
+                  data-category-toggle
+                  aria-expanded="<?= $isExpanded ? 'true' : 'false' ?>"
+                  aria-controls="category-children-<?= (int)$category['id'] ?>">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"></path></svg>
+          </button>
+        <?php else: ?>
+          <span style="width:12px;display:inline-block;flex-shrink:0;"></span>
+        <?php endif; ?>
+        <label class="<?= $labelClass ?>">
+          <input type="checkbox" name="category_ids[]" value="<?= (int)$category['id'] ?>" <?= in_array($category['id'], $selectedIds) ? 'checked' : '' ?> style="width:auto;margin:0;accent-color:var(--green);">
+          <?= h($category['name']) ?> <span style="color:var(--gray-m);font-weight:400;">(<?= h($typeLabel) ?>)</span>
+        </label>
+      </div>
+      <?php if ($hasChildren): ?>
+        <div id="category-children-<?= (int)$category['id'] ?>" class="category-children <?= $isExpanded ? 'is-open' : '' ?>">
+          <?php foreach ($children as $child): ?>
+            <?php render_product_category_node($child, $childrenByParent, $selectedIds, $level + 1); ?>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+    <?php
+}
+
 $statusList = [
     'activo' => 'Activo',
     'reservado' => 'Reservado',
@@ -68,7 +120,8 @@ layout_head($pageTitle, '<style>
 .category-parent-toggle[aria-expanded="true"] svg{transform:rotate(90deg);}
 .category-parent-toggle svg{transition:transform .2s ease;}
 .category-parent-label{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;flex:1;}
-.category-children{display:none;padding:8px 0 4px 42px;}
+.category-child-row{padding-left:calc(var(--cat-level) * 18px);}
+.category-children{display:none;padding:6px 0 4px 24px;}
 .category-children.is-open{display:block;}
 .category-child-label{display:flex;align-items:center;gap:8px;cursor:pointer;padding:5px 0 5px 10px;color:var(--gray-d);}
 </style>');
@@ -105,45 +158,8 @@ layout_sidebar($isEdit ? '' : 'producto.php');
                     <span class="form-hint">No hay categorias. <a href="categorias.php">Crear categorias</a></span>
                   <?php else: ?>
                     <?php foreach ($catParents as $parent): ?>
-                      <?php
-                        $children = $catChildren[$parent['id']] ?? [];
-                        $hasSelectedChild = false;
-                        foreach ($children as $childCheck) {
-                            if (in_array($childCheck['id'], $selectedCatIds)) {
-                                $hasSelectedChild = true;
-                                break;
-                            }
-                        }
-                        $isExpanded = $hasSelectedChild;
-                      ?>
                       <div class="category-group">
-                        <div class="category-parent-row">
-                          <?php if (!empty($children)): ?>
-                            <button type="button"
-                                    class="category-parent-toggle"
-                                    data-category-toggle
-                                    aria-expanded="<?= $isExpanded ? 'true' : 'false' ?>"
-                                    aria-controls="category-children-<?= $parent['id'] ?>">
-                              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"></path></svg>
-                            </button>
-                          <?php else: ?>
-                            <span style="width:12px;display:inline-block;flex-shrink:0;"></span>
-                          <?php endif; ?>
-                          <label class="category-parent-label">
-                            <input type="checkbox" name="category_ids[]" value="<?= $parent['id'] ?>" <?= in_array($parent['id'], $selectedCatIds) ? 'checked' : '' ?> style="width:auto;margin:0;accent-color:var(--green);">
-                            <?= h($parent['name']) ?> <span style="color:var(--gray-m);font-weight:400;">(categoria principal)</span>
-                          </label>
-                        </div>
-                        <?php if (!empty($children)): ?>
-                          <div id="category-children-<?= $parent['id'] ?>" class="category-children <?= $isExpanded ? 'is-open' : '' ?>">
-                            <?php foreach ($children as $child): ?>
-                              <label class="category-child-label">
-                                <input type="checkbox" name="category_ids[]" value="<?= $child['id'] ?>" <?= in_array($child['id'], $selectedCatIds) ? 'checked' : '' ?> style="width:auto;margin:0;accent-color:var(--green);">
-                                <?= h($child['name']) ?> <span style="color:var(--gray-m);">(subcategoria)</span>
-                              </label>
-                            <?php endforeach; ?>
-                          </div>
-                        <?php endif; ?>
+                        <?php render_product_category_node($parent, $catChildren, $selectedCatIds); ?>
                       </div>
                     <?php endforeach; ?>
                   <?php endif; ?>
