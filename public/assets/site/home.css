@@ -226,8 +226,9 @@
   position: relative;
   overflow: hidden;
   background: linear-gradient(180deg, #f8f4ee 0%, #efe7db 100%);
-  background-size: cover;
+  background-size: contain;
   background-position: center;
+  background-repeat: no-repeat;
   border-radius: 18px;
   color: #fff;
   border: 1px solid var(--border);
