@@ -24,12 +24,6 @@
             'description' => 'Limpieza profunda, reparacion de madera y acabado natural.',
         ],
         [
-            'title' => 'Juego de sillas',
-            'before' => 'sillas-tapizado-antes.jpeg',
-            'after' => 'sillas-tapizado-despues.jpeg',
-            'description' => 'Retapizado completo y puesta en valor del conjunto.',
-        ],
-        [
             'title' => 'Sillon orejero',
             'before' => 'sillon-antes.jpeg',
             'after' => 'sillon-despues.jpeg',
