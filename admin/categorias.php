@@ -126,7 +126,9 @@ $allCats = $db->query('
     ORDER BY LOWER(c.name), c.name
 ')->fetchAll();
 
-$parents = array_values(array_filter($allCats, static fn(array $c): bool => $c['parent_id'] === null));
+$parents = array_values(array_filter($allCats, static function (array $c): bool {
+    return $c['parent_id'] === null;
+}));
 $children = [];
 foreach ($allCats as $cat) {
     if ($cat['parent_id'] !== null) {
@@ -356,7 +358,7 @@ layout_sidebar('categorias.php');
             <span class="form-hint">Se usa como fondo en la cabecera de categoria y en la home. Si no cargás una, quedan las iniciales.</span>
             <?php if (!empty($editCat['cover_path'])): ?>
               <div style="margin-top:10px;border-radius:10px;overflow:hidden;border:1px solid #e3dbcf;">
-                <img src="/Montepio/<?= h($editCat['cover_path']) ?>" alt="" style="display:block;width:100%;height:120px;object-fit:cover;">
+                <img src="<?= BASE_URL ?>/<?= h($editCat['cover_path']) ?>" alt="" style="display:block;width:100%;height:120px;object-fit:cover;">
               </div>
             <?php endif; ?>
           </div>

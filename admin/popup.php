@@ -18,11 +18,16 @@ function popup_link_is_valid(string $value): bool
         return true;
     }
 
-    if (str_starts_with($value, '#') || str_starts_with($value, '/')) {
+    if (popup_starts_with($value, '#') || popup_starts_with($value, '/')) {
         return true;
     }
 
     return (bool)preg_match('~^https?://~i', $value);
+}
+
+function popup_starts_with(string $haystack, string $needle): bool
+{
+    return $needle === '' || strncmp($haystack, $needle, strlen($needle)) === 0;
 }
 
 function popup_frequency_options(): array
@@ -38,7 +43,7 @@ function popup_frequency_options(): array
 
 function popup_is_managed_upload(string $path): bool
 {
-    return str_starts_with(ltrim($path, '/'), 'uploads/site/');
+    return popup_starts_with(ltrim($path, '/'), 'uploads/site/');
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

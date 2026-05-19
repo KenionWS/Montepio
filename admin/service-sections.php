@@ -103,7 +103,7 @@ function service_section_sanitize_html(string $html): string
     return trim($html);
 }
 
-function service_section_json(array $payload, int $status = 200): never
+function service_section_json(array $payload, int $status = 200): void
 {
     http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
@@ -113,7 +113,12 @@ function service_section_json(array $payload, int $status = 200): never
 
 function service_section_is_managed_upload(string $path): bool
 {
-    return str_starts_with(ltrim($path, '/'), 'uploads/site/');
+    return service_section_starts_with(ltrim($path, '/'), 'uploads/site/');
+}
+
+function service_section_starts_with(string $haystack, string $needle): bool
+{
+    return $needle === '' || strncmp($haystack, $needle, strlen($needle)) === 0;
 }
 
 $definitions = service_section_definitions();

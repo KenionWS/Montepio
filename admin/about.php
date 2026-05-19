@@ -42,7 +42,9 @@ function about_settings(PDO $db): array
         WHERE setting_key IN ($keys)
     ")->fetchAll(PDO::FETCH_KEY_PAIR);
 
-    return array_replace($defaults, array_filter($rows, static fn($value): bool => $value !== null && $value !== ''));
+    return array_replace($defaults, array_filter($rows, static function ($value): bool {
+        return $value !== null && $value !== '';
+    }));
 }
 
 function about_save_setting(PDO $db, string $key, string $value): void
@@ -78,7 +80,7 @@ function about_sanitize_html(string $html): string
     return trim($html);
 }
 
-function about_json_response(array $payload, int $status = 200): never
+function about_json_response(array $payload, int $status = 200): void
 {
     http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
@@ -153,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        if ($coverPath !== '' && str_starts_with(ltrim($coverPath, '/'), 'uploads/site/')) {
+        if ($coverPath !== '' && about_starts_with(ltrim($coverPath, '/'), 'uploads/site/')) {
             $oldFile = ROOT_PATH . '/' . ltrim($coverPath, '/');
             if (is_file($oldFile)) {
                 @unlink($oldFile);
@@ -176,6 +178,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     flash_set('ok', 'Seccion Quienes somos actualizada.');
     header('Location: ' . ADMIN_URL . '/about.php');
     exit;
+}
+
+function about_starts_with(string $haystack, string $needle): bool
+{
+    return $needle === '' || strncmp($haystack, $needle, strlen($needle)) === 0;
 }
 
 $settings = about_settings($db);

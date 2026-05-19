@@ -7,7 +7,7 @@ require_once __DIR__ . '/config.php';
  * Procesa una imagen y genera thumb, medium y full.
  * Devuelve array con rutas relativas (desde ROOT_PATH) o false si falla.
  */
-function image_process(string $srcPath, int $productId, string $hash): array|false
+function image_process(string $srcPath, int $productId, string $hash)
 {
     if (!extension_loaded('gd')) {
         error_log('GD no está habilitado. Habilitar extension=gd en php.ini');
@@ -62,13 +62,13 @@ function image_process(string $srcPath, int $productId, string $hash): array|fal
  * Procesa imagen desde temp hacia directorio final de producto.
  * Devuelve paths array o false.
  */
-function image_process_temp(string $tempOrigPath, int $productId): array|false
+function image_process_temp(string $tempOrigPath, int $productId)
 {
     $hash = substr(sha1_file($tempOrigPath), 0, 12);
     return image_process($tempOrigPath, $productId, $hash);
 }
 
-function image_process_category_cover(string $srcPath, int $categoryId): string|false
+function image_process_category_cover(string $srcPath, int $categoryId)
 {
     if (!extension_loaded('gd')) {
         error_log('GD no esta habilitado. Habilitar extension=gd en php.ini');
@@ -101,7 +101,7 @@ function image_process_category_cover(string $srcPath, int $categoryId): string|
     return 'uploads/categories/' . $categoryId . '/' . $hash . '_cover.jpg';
 }
 
-function image_process_home_hero(string $srcPath): string|false
+function image_process_home_hero(string $srcPath)
 {
     if (!extension_loaded('gd')) {
         error_log('GD no esta habilitado. Habilitar extension=gd en php.ini');
@@ -134,7 +134,7 @@ function image_process_home_hero(string $srcPath): string|false
     return 'uploads/site/' . $hash . '_home_hero.jpg';
 }
 
-function image_process_home_service(string $srcPath): string|false
+function image_process_home_service(string $srcPath)
 {
     if (!extension_loaded('gd')) {
         error_log('GD no esta habilitado. Habilitar extension=gd en php.ini');
@@ -167,7 +167,7 @@ function image_process_home_service(string $srcPath): string|false
     return 'uploads/site/' . $hash . '_home_service.jpg';
 }
 
-function image_process_site_popup(string $srcPath): string|false
+function image_process_site_popup(string $srcPath)
 {
     if (!extension_loaded('gd')) {
         error_log('GD no esta habilitado. Habilitar extension=gd en php.ini');
@@ -200,7 +200,7 @@ function image_process_site_popup(string $srcPath): string|false
     return 'uploads/site/' . $hash . '_site_popup.jpg';
 }
 
-function image_process_about_cover(string $srcPath): string|false
+function image_process_about_cover(string $srcPath)
 {
     if (!extension_loaded('gd')) {
         error_log('GD no esta habilitado. Habilitar extension=gd en php.ini');
@@ -233,7 +233,7 @@ function image_process_about_cover(string $srcPath): string|false
     return 'uploads/site/' . $hash . '_about_cover.jpg';
 }
 
-function image_process_about_content(string $srcPath): string|false
+function image_process_about_content(string $srcPath)
 {
     if (!extension_loaded('gd')) {
         error_log('GD no esta habilitado. Habilitar extension=gd en php.ini');
@@ -309,29 +309,42 @@ function image_validate_upload(string $path, int $sizeBytes, ?string &$error = n
 
 // ─── Helpers internos ─────────────────────────────────────────────────────────
 
-function image_create_from_path(string $path, int $type): \GdImage|false
+function image_create_from_path(string $path, int $type)
 {
-    return match($type) {
-        IMAGETYPE_JPEG => imagecreatefromjpeg($path),
-        IMAGETYPE_PNG  => imagecreatefrompng($path),
-        IMAGETYPE_GIF  => imagecreatefromgif($path),
-        IMAGETYPE_WEBP => imagecreatefromwebp($path),
-        default        => false,
-    };
+    switch ($type) {
+        case IMAGETYPE_JPEG:
+            return imagecreatefromjpeg($path);
+        case IMAGETYPE_PNG:
+            return imagecreatefrompng($path);
+        case IMAGETYPE_GIF:
+            return imagecreatefromgif($path);
+        case IMAGETYPE_WEBP:
+            return function_exists('imagecreatefromwebp') ? imagecreatefromwebp($path) : false;
+        default:
+            return false;
+    }
 }
 
-function image_fix_orientation(\GdImage $img, string $path): \GdImage
+function image_fix_orientation($img, string $path)
 {
     if (!function_exists('exif_read_data')) return $img;
     $exif = @exif_read_data($path);
     if (!$exif || empty($exif['Orientation'])) return $img;
 
-    $rotated = match((int)$exif['Orientation']) {
-        3 => imagerotate($img, 180, 0),
-        6 => imagerotate($img, -90, 0),
-        8 => imagerotate($img, 90, 0),
-        default => $img,
-    };
+    switch ((int)$exif['Orientation']) {
+        case 3:
+            $rotated = imagerotate($img, 180, 0);
+            break;
+        case 6:
+            $rotated = imagerotate($img, -90, 0);
+            break;
+        case 8:
+            $rotated = imagerotate($img, 90, 0);
+            break;
+        default:
+            $rotated = $img;
+            break;
+    }
     if ($rotated !== $img) {
         imagedestroy($img);
         return $rotated;
@@ -339,7 +352,7 @@ function image_fix_orientation(\GdImage $img, string $path): \GdImage
     return $img;
 }
 
-function image_flatten_to_white(\GdImage $src): \GdImage
+function image_flatten_to_white($src)
 {
     $w = imagesx($src);
     $h = imagesy($src);
@@ -353,7 +366,7 @@ function image_flatten_to_white(\GdImage $src): \GdImage
     return $dst;
 }
 
-function image_crop_square(\GdImage $src, int $w, int $h, int $size): \GdImage
+function image_crop_square($src, int $w, int $h, int $size)
 {
     $dst = imagecreatetruecolor($size, $size);
     imagefill($dst, 0, 0, imagecolorallocate($dst, 255, 255, 255));
@@ -371,7 +384,7 @@ function image_crop_square(\GdImage $src, int $w, int $h, int $size): \GdImage
     return $dst;
 }
 
-function image_resize_max(\GdImage $src, int $w, int $h, int $maxSide): \GdImage
+function image_resize_max($src, int $w, int $h, int $maxSide)
 {
     if ($w <= $maxSide && $h <= $maxSide) {
         // No necesita reducirse, clonar
@@ -395,7 +408,7 @@ function image_resize_max(\GdImage $src, int $w, int $h, int $maxSide): \GdImage
     return $dst;
 }
 
-function image_resize_cover(\GdImage $src, int $w, int $h, int $targetW, int $targetH): \GdImage
+function image_resize_cover($src, int $w, int $h, int $targetW, int $targetH)
 {
     $scale = max($targetW / $w, $targetH / $h);
     $srcW = (int)round($targetW / $scale);
@@ -419,10 +432,14 @@ function image_parse_ini_bytes(string $value): int
     $suffix = strtolower(substr($value, -1));
     $bytes = (int)$value;
 
-    return match($suffix) {
-        'g' => $bytes * 1024 * 1024 * 1024,
-        'm' => $bytes * 1024 * 1024,
-        'k' => $bytes * 1024,
-        default => (int)$value,
-    };
+    switch ($suffix) {
+        case 'g':
+            return $bytes * 1024 * 1024 * 1024;
+        case 'm':
+            return $bytes * 1024 * 1024;
+        case 'k':
+            return $bytes * 1024;
+        default:
+            return (int)$value;
+    }
 }

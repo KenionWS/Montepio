@@ -18,11 +18,16 @@ function hero_admin_link_is_valid(string $value): bool
         return true;
     }
 
-    if (str_starts_with($value, '#') || str_starts_with($value, '/')) {
+    if (home_admin_starts_with($value, '#') || home_admin_starts_with($value, '/')) {
         return true;
     }
 
     return (bool)preg_match('~^https?://~i', $value);
+}
+
+function home_admin_starts_with(string $haystack, string $needle): bool
+{
+    return $needle === '' || strncmp($haystack, $needle, strlen($needle)) === 0;
 }
 
 function contact_admin_link_is_valid(string $value): bool
@@ -109,7 +114,9 @@ function home_about_defaults(): array
 function home_about_settings(PDO $db): array
 {
     $defaults = home_about_defaults();
-    $keys = array_map(static fn(string $key): string => 'home_about_' . $key, array_keys($defaults));
+    $keys = array_map(static function (string $key): string {
+        return 'home_about_' . $key;
+    }, array_keys($defaults));
     $placeholders = implode(',', array_fill(0, count($keys), '?'));
     $stmt = $db->prepare("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ($placeholders)");
     $stmt->execute($keys);
@@ -158,7 +165,7 @@ function service_admin_style_options(): array
 
 function hero_admin_is_managed_upload(string $path): bool
 {
-    return str_starts_with(ltrim($path, '/'), 'uploads/site/');
+    return home_admin_starts_with(ltrim($path, '/'), 'uploads/site/');
 }
 
 function hero_admin_ensure_default_slide(PDO $db): void

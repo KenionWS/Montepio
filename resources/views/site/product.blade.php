@@ -249,7 +249,7 @@
                     <div class="product-info-sm">
                         <span class="sub">{{ $related['category_name'] ?: 'Catalogo' }}</span>
                         <span class="name">{{ $related['title'] }}</span>
-                        <span class="price {{ str_contains((string) ($related['price_label'] ?? ''), 'Consultar') ? 'consultar' : '' }}">{{ $related['price_label'] }}</span>
+                        <span class="price {{ strpos((string) ($related['price_label'] ?? ''), 'Consultar') !== false ? 'consultar' : '' }}">{{ $related['price_label'] }}</span>
                     </div>
                 </a>
             @empty

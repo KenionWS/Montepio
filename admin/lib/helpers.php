@@ -37,14 +37,14 @@ function unique_slug(string $base, int $excludeId = 0, string $table = 'products
 }
 
 // ─── HTTP / JSON ──────────────────────────────────────────────────────────────
-function json_ok(array $data = []): never
+function json_ok(array $data = []): void
 {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['ok' => true] + $data);
     exit;
 }
 
-function json_err(string $msg, int $code = 400): never
+function json_err(string $msg, int $code = 400): void
 {
     http_response_code($code);
     header('Content-Type: application/json; charset=utf-8');

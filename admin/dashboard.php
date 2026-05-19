@@ -139,7 +139,7 @@ layout_sidebar('dashboard.php');
         <tr>
           <td>
             <?php if ($thumb): ?>
-              <img src="/Montepio/<?= h($thumb) ?>" class="td-thumb" alt="">
+              <img src="<?= BASE_URL ?>/<?= h($thumb) ?>" class="td-thumb" alt="">
             <?php else: ?>
               <div class="td-thumb-placeholder">[]</div>
             <?php endif; ?>
@@ -199,7 +199,9 @@ layout_sidebar('dashboard.php');
   <div style="padding:16px 20px;display:flex;gap:6px;align-items:center;border-top:1px solid #ece7dd;">
     <?php
     $query = ['q' => $search, 'cat' => $catId ?: null, 'status' => $status ?: null, 'rental_only' => $rentalOnly ? 1 : null];
-    $qs = http_build_query(array_filter($query, static fn($value) => $value !== null && $value !== ''));
+    $qs = http_build_query(array_filter($query, static function ($value): bool {
+        return $value !== null && $value !== '';
+    }));
     for ($i = 1; $i <= $pages; $i++):
     ?>
       <a href="?<?= $qs ?>&page=<?= $i ?>" class="btn btn-sm <?= $i === $page ? 'btn-primary' : 'btn-outline' ?>">

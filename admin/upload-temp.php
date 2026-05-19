@@ -57,24 +57,42 @@ if (!move_uploaded_file($file['tmp_name'], $origPath)) {
 $thumbPath = null;
 $thumbUrl  = null;
 if (extension_loaded('gd')) {
-    $src = match($info[2]) {
-        IMAGETYPE_JPEG => imagecreatefromjpeg($origPath),
-        IMAGETYPE_PNG  => imagecreatefrompng($origPath),
-        IMAGETYPE_GIF  => imagecreatefromgif($origPath),
-        IMAGETYPE_WEBP => imagecreatefromwebp($origPath),
-        default => false,
-    };
+    switch ($info[2]) {
+        case IMAGETYPE_JPEG:
+            $src = imagecreatefromjpeg($origPath);
+            break;
+        case IMAGETYPE_PNG:
+            $src = imagecreatefrompng($origPath);
+            break;
+        case IMAGETYPE_GIF:
+            $src = imagecreatefromgif($origPath);
+            break;
+        case IMAGETYPE_WEBP:
+            $src = function_exists('imagecreatefromwebp') ? imagecreatefromwebp($origPath) : false;
+            break;
+        default:
+            $src = false;
+            break;
+    }
     if ($src) {
         // Fix EXIF orientation
         if (function_exists('exif_read_data')) {
             $exif = @exif_read_data($origPath);
             if ($exif && !empty($exif['Orientation'])) {
-                $rotated = match((int)$exif['Orientation']) {
-                    3 => imagerotate($src, 180, 0),
-                    6 => imagerotate($src, -90, 0),
-                    8 => imagerotate($src, 90, 0),
-                    default => $src,
-                };
+                switch ((int)$exif['Orientation']) {
+                    case 3:
+                        $rotated = imagerotate($src, 180, 0);
+                        break;
+                    case 6:
+                        $rotated = imagerotate($src, -90, 0);
+                        break;
+                    case 8:
+                        $rotated = imagerotate($src, 90, 0);
+                        break;
+                    default:
+                        $rotated = $src;
+                        break;
+                }
                 if ($rotated !== $src) { imagedestroy($src); $src = $rotated; }
             }
         }
@@ -89,7 +107,7 @@ if (extension_loaded('gd')) {
         imagejpeg($thumb, $thumbPath, 85);
         imagedestroy($thumb);
         imagedestroy($src);
-        $thumbUrl = '/Montepio/uploads/temp/' . $token . '/thumb.jpg';
+        $thumbUrl = BASE_URL . '/uploads/temp/' . $token . '/thumb.jpg';
     }
 }
 

@@ -8,7 +8,7 @@ function layout_head(string $title, string $extraHead = ''): void { ?>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= h($title) ?> — Montepio Admin</title>
-<link rel="icon" type="image/x-icon" href="/Montepio/favicon.ico">
+<link rel="icon" type="image/x-icon" href="<?= BASE_URL ?>/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -208,7 +208,7 @@ function layout_sidebar(string $active = ''): void
     ?>
 <aside class="sidebar">
   <a href="dashboard.php" class="sidebar-logo">
-    <img src="/Montepio/assets/brand/montepio-logo-wt.png" alt="Montepio Antiguedades" class="sidebar-logo-image"> <div class="sidebar-logo-text">
+    <img src="<?= BASE_URL ?>/assets/brand/montepio-logo-wt.png" alt="Montepio Antiguedades" class="sidebar-logo-image"> <div class="sidebar-logo-text">
     </div>
   </a>
   <nav class="sidebar-nav">
@@ -221,7 +221,7 @@ function layout_sidebar(string $active = ''): void
     </a>
     <?php endforeach; ?>
     <div class="nav-section" style="margin-top:12px;">Sitio</div>
-    <a href="/Montepio/" target="_blank" class="nav-link">
+    <a href="<?= BASE_URL ?>/" target="_blank" class="nav-link">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       Ver el sitio
     </a>

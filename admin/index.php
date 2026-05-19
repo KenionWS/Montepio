@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Login — Montepio Admin</title>
-<link rel="icon" type="image/x-icon" href="/Montepio/favicon.ico">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -50,7 +50,7 @@ input:focus{border-color:#004d33;}
 <body>
 <div class="box">
   <div class="logo">
-    <img src="/Montepio/assets/brand/montepio-logo.jpg" alt="Montepio Antiguedades" class="logo-image"><div class="logo-text"><div class="sub">Admin</div></div>
+    <img src="<?= BASE_URL ?>/assets/brand/montepio-logo.jpg" alt="Montepio Antiguedades" class="logo-image"><div class="logo-text"><div class="sub">Admin</div></div>
   </div>
   <h1>Iniciar sesión</h1>
   <p>Ingresá la contraseña para acceder al panel.</p>
@@ -67,8 +67,7 @@ input:focus{border-color:#004d33;}
     </div>
     <button type="submit" class="btn">Entrar al panel</button>
   </form>
-  <a href="/Montepio/" class="site-link">← Ver el sitio</a>
+  <a href="/" class="site-link">← Ver el sitio</a>
 </div>
 </body>
 </html>
-

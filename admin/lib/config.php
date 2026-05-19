@@ -5,9 +5,9 @@ declare(strict_types=1);
 define('ROOT_PATH',    realpath(__DIR__ . '/../../'));
 define('DATA_PATH',    ROOT_PATH . '/data');
 define('UPLOADS_PATH', ROOT_PATH . '/uploads');
-define('ADMIN_URL',    '/Montepio/admin');
-define('UPLOADS_URL',  '/Montepio/uploads');
-define('BASE_URL',     '/Montepio');
+define('ADMIN_URL',    '/New/admin');
+define('UPLOADS_URL',  '/New/uploads');
+define('BASE_URL',     '/New');
 
 // ─── Base de datos ────────────────────────────────────────────────────────────
 define('DB_PATH',      DATA_PATH . '/montepio.sqlite');

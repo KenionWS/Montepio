@@ -25,7 +25,9 @@ class SiteCatalog
 
         $categoryTree = self::fetchCategoryTree();
         $categories = $categoryTree;
-        usort($categories, static fn(array $a, array $b): int => strcasecmp((string)$a['name'], (string)$b['name']));
+        usort($categories, static function (array $a, array $b): int {
+            return strcasecmp((string)$a['name'], (string)$b['name']);
+        });
         $categories = array_slice($categories, 0, 6);
 
         return [
@@ -116,7 +118,7 @@ class SiteCatalog
                 $haystack = (string)$category['name'] . ' ' . (string)($category['description'] ?? '');
                 $haystack = function_exists('mb_strtolower') ? mb_strtolower($haystack) : strtolower($haystack);
 
-                return str_contains($haystack, $needle);
+                return self::contains($haystack, $needle);
             }));
         }
 
@@ -142,7 +144,9 @@ class SiteCatalog
 
     public static function categoryViewData(string $categorySlug, ?string $subCategorySlug = null): ?array
     {
-        $segments = array_values(array_filter(explode('/', trim($categorySlug, '/')), static fn(string $part): bool => $part !== ''));
+        $segments = array_values(array_filter(explode('/', trim($categorySlug, '/')), static function (string $part): bool {
+            return $part !== '';
+        }));
         if ($subCategorySlug !== null && $subCategorySlug !== '') {
             $segments[] = $subCategorySlug;
         }
@@ -248,7 +252,9 @@ class SiteCatalog
 
         $relatedProducts = array_values(array_filter(
             self::fetchProductsForCategoryIds($relatedIds),
-            static fn(array $item): bool => $item['slug'] !== $slug
+            static function (array $item) use ($slug): bool {
+                return $item['slug'] !== $slug;
+            }
         ));
         $relatedProducts = array_slice($relatedProducts, 0, 4);
 
@@ -478,7 +484,9 @@ class SiteCatalog
         $slug = $category['slug'];
         $pathSlugs = $category['path_slugs'] ?? [$slug];
         $url = self::baseUrl() . '/catalogo/' . implode('/', array_map(
-            static fn(string $pathSlug): string => rawurlencode($pathSlug),
+            static function (string $pathSlug): string {
+                return rawurlencode($pathSlug);
+            },
             $pathSlugs
         ));
 
@@ -870,7 +878,7 @@ class SiteCatalog
         $items = [];
         foreach ($defaults['items'] as $key => $item) {
             $link = trim((string)($rows['home_contact_' . $key . '_link'] ?? $item['link']));
-            if ($link !== '' && str_starts_with($link, '/')) {
+            if ($link !== '' && self::startsWith($link, '/')) {
                 $link = self::baseUrl() . $link;
             }
 
@@ -936,7 +944,9 @@ class SiteCatalog
             'badge_text' => "anos de\nhistoria",
         ];
 
-        $keys = array_map(static fn(string $key): string => 'home_about_' . $key, array_keys($defaults));
+        $keys = array_map(static function (string $key): string {
+            return 'home_about_' . $key;
+        }, array_keys($defaults));
         $db = self::db();
         $placeholders = implode(',', array_fill(0, count($keys), '?'));
         $stmt = $db->prepare("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ($placeholders)");
@@ -949,7 +959,7 @@ class SiteCatalog
         }
 
         $buttonLink = $data['button_link'];
-        if ($buttonLink !== '' && str_starts_with($buttonLink, '/')) {
+        if ($buttonLink !== '' && self::startsWith($buttonLink, '/')) {
             $buttonLink = self::baseUrl() . $buttonLink;
         }
 
@@ -1029,19 +1039,37 @@ class SiteCatalog
     private static function normalizeServiceLink(string $linkUrl, string $styleKey): string
     {
         if ($linkUrl === '') {
-            $linkUrl = match ($styleKey) {
-                'rent' => '/alquileres',
-                'buy' => '/compra-venta',
-                'restore' => '/restauraciones',
-                default => '',
-            };
+            switch ($styleKey) {
+                case 'rent':
+                    $linkUrl = '/alquileres';
+                    break;
+                case 'buy':
+                    $linkUrl = '/compra-venta';
+                    break;
+                case 'restore':
+                    $linkUrl = '/restauraciones';
+                    break;
+                default:
+                    $linkUrl = '';
+                    break;
+            }
         }
 
-        if ($linkUrl !== '' && str_starts_with($linkUrl, '/')) {
+        if ($linkUrl !== '' && self::startsWith($linkUrl, '/')) {
             return self::baseUrl() . $linkUrl;
         }
 
         return $linkUrl;
+    }
+
+    private static function contains(string $haystack, string $needle): bool
+    {
+        return $needle === '' || strpos($haystack, $needle) !== false;
+    }
+
+    private static function startsWith(string $haystack, string $needle): bool
+    {
+        return $needle === '' || strncmp($haystack, $needle, strlen($needle)) === 0;
     }
 
     private static function db(): PDO

@@ -10,7 +10,9 @@ require_once __DIR__ . '/lib/layout.php';
 auth_require();
 
 $categories = db()->query("SELECT * FROM categories ORDER BY LOWER(name), name")->fetchAll();
-$catParents = array_filter($categories, fn($c) => $c['parent_id'] === null);
+$catParents = array_filter($categories, static function ($c): bool {
+    return $c['parent_id'] === null;
+});
 $catChildren = [];
 foreach ($categories as $c) {
     if ($c['parent_id'] !== null) {

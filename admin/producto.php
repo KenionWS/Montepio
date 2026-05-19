@@ -39,7 +39,9 @@ if ($isEdit) {
     $selectedCatIds = $catStmt->fetchAll(PDO::FETCH_COLUMN);
 }
 
-$catParents = array_filter($categories, fn($c) => $c['parent_id'] === null);
+$catParents = array_filter($categories, static function ($c): bool {
+    return $c['parent_id'] === null;
+});
 $catChildren = [];
 foreach ($categories as $c) {
     if ($c['parent_id'] !== null) {
@@ -181,7 +183,7 @@ layout_sidebar($isEdit ? '' : 'producto.php');
             <div class="img-previews" id="existingImgs">
               <?php foreach ($images as $img): ?>
                 <div class="img-preview-item" id="img-<?= (int)$img['id'] ?>">
-                  <img src="/Montepio/<?= h($img['path_thumb']) ?>" alt="">
+                  <img src="<?= BASE_URL ?>/<?= h($img['path_thumb']) ?>" alt="">
                   <?php if ($img['is_cover']): ?>
                     <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,77,51,.7);color:white;font-size:9px;text-align:center;padding:2px;">portada</div>
                   <?php endif; ?>
@@ -335,7 +337,7 @@ layout_sidebar($isEdit ? '' : 'producto.php');
         <?= $isEdit ? 'Guardar cambios' : 'Crear producto' ?>
       </button>
       <?php if ($isEdit): ?>
-        <a href="/Montepio/producto/<?= h($p['slug']) ?>" target="_blank" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:8px;">
+        <a href="<?= BASE_URL ?>/producto/<?= h($p['slug']) ?>" target="_blank" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:8px;">
           Ver en el sitio ->
         </a>
       <?php endif; ?>

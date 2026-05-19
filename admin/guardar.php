@@ -155,8 +155,12 @@ if (
     $files &&
     is_array($files['tmp_name']) &&
     (
-        array_filter($files['tmp_name'], static fn($tmp): bool => is_string($tmp) && $tmp !== '')
-        || array_filter((array)($files['error'] ?? []), static fn($error): bool => (int)$error !== UPLOAD_ERR_NO_FILE)
+        array_filter($files['tmp_name'], static function ($tmp): bool {
+            return is_string($tmp) && $tmp !== '';
+        })
+        || array_filter((array)($files['error'] ?? []), static function ($error): bool {
+            return (int)$error !== UPLOAD_ERR_NO_FILE;
+        })
     )
 ) {
     $cntStmt = $db->prepare("SELECT COUNT(*) FROM product_images WHERE product_id = ?");

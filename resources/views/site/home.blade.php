@@ -78,7 +78,7 @@
         @foreach ($heroSlides as $index => $slide)
             <article class="hero-slide{{ $index === 0 ? ' is-active' : '' }}" data-hero-slide>
                 @if (!empty($slide['link_url']))
-                    <a href="{{ $slide['link_url'] }}" class="hero-link-overlay" target="{{ str_starts_with($slide['link_url'], 'http') ? '_blank' : '_self' }}" rel="noopener" aria-label="Abrir enlace destacado"></a>
+                    <a href="{{ $slide['link_url'] }}" class="hero-link-overlay" target="{{ strpos($slide['link_url'], 'http') === 0 ? '_blank' : '_self' }}" rel="noopener" aria-label="Abrir enlace destacado"></a>
                 @endif
                 <div class="hero-img" style="background-image:url('{{ $slide['image_url'] }}')"></div>
                 <div class="hero-bg"></div>
