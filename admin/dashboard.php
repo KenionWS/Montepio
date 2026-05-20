@@ -41,6 +41,7 @@ $countStmt = $db->prepare("SELECT COUNT(*) FROM products p WHERE $whereStr");
 $countStmt->execute($params);
 $total = (int)$countStmt->fetchColumn();
 $pages = max(1, (int)ceil($total / $perPage));
+$page = min($page, $pages);
 $offset = ($page - 1) * $perPage;
 
 $stmt = $db->prepare("
@@ -57,6 +58,7 @@ $stmt->execute([...$params, $perPage, $offset]);
 $products = $stmt->fetchAll();
 
 $categories = $db->query("SELECT * FROM categories ORDER BY LOWER(name), name")->fetchAll();
+$currentUrl = ADMIN_URL . '/dashboard.php' . ($_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : '');
 
 layout_head('Dashboard');
 layout_sidebar('dashboard.php');
@@ -113,13 +115,23 @@ layout_sidebar('dashboard.php');
 
 <div class="card">
   <div class="card-header">
-    <h3><?= $total ?> producto<?= $total !== 1 ? 's' : '' ?></h3>
-    <span class="text-sm text-m">Pagina <?= $page ?> de <?= $pages ?></span>
+    <div>
+      <h3><?= $total ?> producto<?= $total !== 1 ? 's' : '' ?></h3>
+      <span class="text-sm text-m">Pagina <?= $page ?> de <?= $pages ?></span>
+    </div>
+    <form method="POST" action="eliminar.php" id="bulk-delete-form" onsubmit="return confirmBulkDelete()">
+      <?= csrf_input() ?>
+      <input type="hidden" name="redirect" value="<?= h($currentUrl) ?>">
+      <button type="submit" class="btn btn-danger btn-sm" id="bulk-delete-btn" disabled>
+        Eliminar seleccionados
+      </button>
+    </form>
   </div>
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
+          <th style="width:44px;"><input type="checkbox" id="select-all-products" aria-label="Seleccionar todos"></th>
           <th style="width:64px;">Foto</th>
           <th>Nombre</th>
           <th>Categoria</th>
@@ -131,12 +143,15 @@ layout_sidebar('dashboard.php');
       </thead>
       <tbody>
         <?php if (empty($products)): ?>
-        <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--gray-m);">No se encontraron productos.</td></tr>
+        <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--gray-m);">No se encontraron productos.</td></tr>
         <?php endif; ?>
         <?php foreach ($products as $p):
             $thumb = $p['cover_thumb'] ?? $p['first_thumb'] ?? null;
         ?>
         <tr>
+          <td>
+            <input type="checkbox" name="ids[]" value="<?= $p['id'] ?>" class="product-check" form="bulk-delete-form" aria-label="Seleccionar <?= h($p['title']) ?>">
+          </td>
           <td>
             <?php if ($thumb): ?>
               <img src="<?= BASE_URL ?>/<?= h($thumb) ?>" class="td-thumb" alt="">
@@ -183,6 +198,7 @@ layout_sidebar('dashboard.php');
               <form method="POST" action="eliminar.php" onsubmit="return confirm('Eliminar <?= h(addslashes($p['title'])) ?>? Esta accion no se puede deshacer.')">
                 <?= csrf_input() ?>
                 <input type="hidden" name="id" value="<?= $p['id'] ?>">
+                <input type="hidden" name="redirect" value="<?= h($currentUrl) ?>">
                 <button type="submit" class="btn btn-danger btn-icon btn-sm" title="Eliminar">
                   <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                 </button>
@@ -196,18 +212,34 @@ layout_sidebar('dashboard.php');
   </div>
 
   <?php if ($pages > 1): ?>
-  <div style="padding:16px 20px;display:flex;gap:6px;align-items:center;border-top:1px solid #ece7dd;">
+  <div class="pager">
     <?php
     $query = ['q' => $search, 'cat' => $catId ?: null, 'status' => $status ?: null, 'rental_only' => $rentalOnly ? 1 : null];
-    $qs = http_build_query(array_filter($query, static function ($value): bool {
+    $baseQuery = array_filter($query, static function ($value): bool {
         return $value !== null && $value !== '';
-    }));
-    for ($i = 1; $i <= $pages; $i++):
+    });
+    $pageUrl = static function (int $targetPage) use ($baseQuery): string {
+        return '?' . http_build_query($baseQuery + ['page' => $targetPage]);
+    };
+    $pageItems = [1, $pages];
+    for ($i = max(1, $page - 2); $i <= min($pages, $page + 2); $i++) {
+        $pageItems[] = $i;
+    }
+    $pageItems = array_values(array_unique($pageItems));
+    sort($pageItems);
     ?>
-      <a href="?<?= $qs ?>&page=<?= $i ?>" class="btn btn-sm <?= $i === $page ? 'btn-primary' : 'btn-outline' ?>">
+    <a href="<?= $pageUrl(max(1, $page - 1)) ?>" class="btn btn-sm btn-outline <?= $page === 1 ? 'pager-disabled' : '' ?>">Anterior</a>
+    <?php $previousItem = 0; ?>
+    <?php foreach ($pageItems as $i): ?>
+      <?php if ($previousItem && $i > $previousItem + 1): ?>
+        <span class="pager-ellipsis">...</span>
+      <?php endif; ?>
+      <a href="<?= $pageUrl($i) ?>" class="btn btn-sm <?= $i === $page ? 'btn-primary' : 'btn-outline' ?>">
         <?= $i ?>
       </a>
-    <?php endfor; ?>
+      <?php $previousItem = $i; ?>
+    <?php endforeach; ?>
+    <a href="<?= $pageUrl(min($pages, $page + 1)) ?>" class="btn btn-sm btn-outline <?= $page === $pages ? 'pager-disabled' : '' ?>">Siguiente</a>
   </div>
   <?php endif; ?>
 </div>
@@ -227,6 +259,26 @@ layout_sidebar('dashboard.php');
 .inline-field.saved  { border-color: #27ae60; background: #f0faf4; }
 .inline-field.error  { border-color: var(--red); background: var(--red-l); }
 .inline-select { cursor: pointer; }
+.product-check,
+#select-all-products { width:16px; height:16px; cursor:pointer; }
+#bulk-delete-btn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+.pager {
+  padding:16px 20px;
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
+  border-top:1px solid #ece7dd;
+}
+.pager .btn { min-width:32px; justify-content:center; }
+.pager-disabled {
+  opacity:.45;
+  pointer-events:none;
+}
+.pager-ellipsis {
+  color:var(--gray-m);
+  padding:0 4px;
+}
 </style>
 
 <script>
@@ -275,5 +327,36 @@ document.querySelectorAll('.inline-field').forEach(el => {
     });
   }
 });
+
+const selectAllProducts = document.getElementById('select-all-products');
+const productChecks = Array.from(document.querySelectorAll('.product-check'));
+const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+
+function updateBulkDeleteState() {
+  const selected = productChecks.filter(check => check.checked).length;
+  if (bulkDeleteBtn) {
+    bulkDeleteBtn.disabled = selected === 0;
+    bulkDeleteBtn.textContent = selected > 0 ? `Eliminar seleccionados (${selected})` : 'Eliminar seleccionados';
+  }
+  if (selectAllProducts) {
+    selectAllProducts.checked = selected > 0 && selected === productChecks.length;
+    selectAllProducts.indeterminate = selected > 0 && selected < productChecks.length;
+  }
+}
+
+function confirmBulkDelete() {
+  const selected = productChecks.filter(check => check.checked).length;
+  if (selected === 0) return false;
+  return confirm(`Eliminar ${selected} producto${selected !== 1 ? 's' : ''} seleccionado${selected !== 1 ? 's' : ''}? Esta accion no se puede deshacer.`);
+}
+
+if (selectAllProducts) {
+  selectAllProducts.addEventListener('change', () => {
+    productChecks.forEach(check => { check.checked = selectAllProducts.checked; });
+    updateBulkDeleteState();
+  });
+}
+productChecks.forEach(check => check.addEventListener('change', updateBulkDeleteState));
+updateBulkDeleteState();
 </script>
 <?php layout_foot(); ?>
