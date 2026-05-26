@@ -35,7 +35,7 @@ function image_process(string $srcPath, int $productId, string $hash)
 
     // Thumb: 300×300 crop centrado
     $thumbPath = $dir . '/' . $hash . '_thumb.jpg';
-    $thumb = image_crop_square($src, $w, $h, IMG_THUMB_SIZE);
+    $thumb = image_fit_square($src, $w, $h, IMG_THUMB_SIZE);
     imagejpeg($thumb, $thumbPath, IMG_QUALITY);
     imagedestroy($thumb);
     $paths['thumb'] = 'uploads/products/' . $productId . '/' . $hash . '_thumb.jpg';
@@ -381,6 +381,26 @@ function image_crop_square($src, int $w, int $h, int $size)
     $srcW = $srcW ?? $w;
 
     imagecopyresampled($dst, $src, 0, 0, $srcX, $srcY, $size, $size, $srcW, $srcH);
+    return $dst;
+}
+
+function image_fit_square($src, int $w, int $h, int $size)
+{
+    $dst = imagecreatetruecolor($size, $size);
+    $white = imagecolorallocate($dst, 255, 255, 255);
+    imagefill($dst, 0, 0, $white);
+
+    if ($w <= 0 || $h <= 0) {
+        return $dst;
+    }
+
+    $scale = min($size / $w, $size / $h);
+    $targetW = max(1, (int)round($w * $scale));
+    $targetH = max(1, (int)round($h * $scale));
+    $dstX = (int)floor(($size - $targetW) / 2);
+    $dstY = (int)floor(($size - $targetH) / 2);
+
+    imagecopyresampled($dst, $src, $dstX, $dstY, 0, 0, $targetW, $targetH, $w, $h);
     return $dst;
 }
 

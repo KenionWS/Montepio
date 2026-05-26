@@ -57,54 +57,13 @@ if (!move_uploaded_file($file['tmp_name'], $origPath)) {
 $thumbPath = null;
 $thumbUrl  = null;
 if (extension_loaded('gd')) {
-    switch ($info[2]) {
-        case IMAGETYPE_JPEG:
-            $src = imagecreatefromjpeg($origPath);
-            break;
-        case IMAGETYPE_PNG:
-            $src = imagecreatefrompng($origPath);
-            break;
-        case IMAGETYPE_GIF:
-            $src = imagecreatefromgif($origPath);
-            break;
-        case IMAGETYPE_WEBP:
-            $src = function_exists('imagecreatefromwebp') ? imagecreatefromwebp($origPath) : false;
-            break;
-        default:
-            $src = false;
-            break;
-    }
+    $src = image_create_from_path($origPath, (int)$info[2]);
     if ($src) {
-        // Fix EXIF orientation
-        if (function_exists('exif_read_data')) {
-            $exif = @exif_read_data($origPath);
-            if ($exif && !empty($exif['Orientation'])) {
-                switch ((int)$exif['Orientation']) {
-                    case 3:
-                        $rotated = imagerotate($src, 180, 0);
-                        break;
-                    case 6:
-                        $rotated = imagerotate($src, -90, 0);
-                        break;
-                    case 8:
-                        $rotated = imagerotate($src, 90, 0);
-                        break;
-                    default:
-                        $rotated = $src;
-                        break;
-                }
-                if ($rotated !== $src) { imagedestroy($src); $src = $rotated; }
-            }
-        }
-        $w = imagesx($src); $h = imagesy($src);
-        $size = 300;
-        if ($w > $h) { $sW=$h; $sX=(int)(($w-$h)/2); $sY=0; }
-        else         { $sW=$w; $sX=0; $sY=(int)(($h-$w)/2); }
-        $thumb = imagecreatetruecolor($size, $size);
-        imagefill($thumb, 0, 0, imagecolorallocate($thumb, 255,255,255));
-        imagecopyresampled($thumb, $src, 0, 0, $sX, $sY, $size, $size, $sW, $sW);
+        $src = image_fix_orientation($src, $origPath);
+        $src = image_flatten_to_white($src);
+        $thumb = image_fit_square($src, imagesx($src), imagesy($src), IMG_THUMB_SIZE);
         $thumbPath = $tempDir . '/thumb.jpg';
-        imagejpeg($thumb, $thumbPath, 85);
+        imagejpeg($thumb, $thumbPath, IMG_QUALITY);
         imagedestroy($thumb);
         imagedestroy($src);
         $thumbUrl = BASE_URL . '/uploads/temp/' . $token . '/thumb.jpg';
