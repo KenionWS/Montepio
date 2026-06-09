@@ -78,6 +78,7 @@ return new class extends Migration
         Schema::create('product_category', function (Blueprint $table): void {
             $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
+            $table->integer('position')->default(0);
             $table->primary(['product_id', 'category_id']);
         });
 

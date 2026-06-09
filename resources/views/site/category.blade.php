@@ -99,7 +99,7 @@
                 <p class="products-count"><strong>{{ $productsCount }} pieza(s)</strong> en {{ $currentCategory['name'] }}</p>
                 <div class="toolbar-right">
                     <select class="sort-select" aria-label="Ordenar productos">
-                        <option>Mas recientes</option>
+                        <option>Orden del catalogo</option>
                     </select>
                     <div class="view-toggle">
                         <span class="view-btn" aria-hidden="true">

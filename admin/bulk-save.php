@@ -84,9 +84,11 @@ try {
         $productId = (int)$db->lastInsertId();
 
         if ($categoryIds) {
-            $pivot = $db->prepare("INSERT OR IGNORE INTO product_categories (product_id, category_id) VALUES (?, ?)");
+            $pivot = $db->prepare("INSERT OR IGNORE INTO product_categories (product_id, category_id, position) VALUES (?, ?, ?)");
+            $nextPositionStmt = $db->prepare("SELECT COALESCE(MAX(position), -1) + 1 FROM product_categories WHERE category_id = ?");
             foreach ($categoryIds as $cid) {
-                $pivot->execute([$productId, $cid]);
+                $nextPositionStmt->execute([$cid]);
+                $pivot->execute([$productId, $cid, (int)$nextPositionStmt->fetchColumn()]);
             }
         }
 

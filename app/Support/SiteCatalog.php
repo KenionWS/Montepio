@@ -162,7 +162,7 @@ class SiteCatalog
         $children = $currentCategory['children'] ?? [];
         $categoryIds = self::collectCategoryIds($currentCategory);
 
-        $products = self::fetchProductsForCategoryIds($categoryIds);
+        $products = self::fetchProductsForCategoryIds($categoryIds, (int)$currentCategory['id']);
 
         return [
             'baseUrl' => self::baseUrl(),
@@ -251,7 +251,7 @@ class SiteCatalog
         $relatedIds = array_column($categoryPath, 'id');
 
         $relatedProducts = array_values(array_filter(
-            self::fetchProductsForCategoryIds($relatedIds),
+            self::fetchProductsForCategoryIds($relatedIds, !empty($primaryCategory['id']) ? (int)$primaryCategory['id'] : null),
             static function (array $item) use ($slug): bool {
                 return $item['slug'] !== $slug;
             }
@@ -341,7 +341,7 @@ class SiteCatalog
         return array_map([self::class, 'mapProduct'], $rows);
     }
 
-    private static function fetchProductsForCategoryIds(array $categoryIds): array
+    private static function fetchProductsForCategoryIds(array $categoryIds, ?int $activeCategoryId = null): array
     {
         if (empty($categoryIds)) {
             return [];
@@ -350,9 +350,12 @@ class SiteCatalog
         $db = self::db();
         $ids = array_values(array_unique(array_map('intval', $categoryIds)));
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $priorityCategoryId = $activeCategoryId !== null && in_array($activeCategoryId, $ids, true)
+            ? $activeCategoryId
+            : $ids[0];
 
         $stmt = $db->prepare("
-            SELECT DISTINCT
+            SELECT
                 p.id,
                 p.title,
                 p.slug,
@@ -367,6 +370,20 @@ class SiteCatalog
                 c.name AS category_name,
                 c.slug AS category_slug,
                 c.icon AS category_icon,
+                MIN(
+                    CASE
+                        WHEN p.category_id = ? OR pc.category_id = ? THEN 0
+                        WHEN p.category_id IN ($placeholders) OR pc.category_id IN ($placeholders) THEN 1
+                        ELSE 2
+                    END
+                ) AS category_match_priority,
+                MIN(
+                    CASE
+                        WHEN pc.category_id = ? THEN pc.position
+                        WHEN pc.category_id IN ($placeholders) THEN pc.position
+                        ELSE NULL
+                    END
+                ) AS category_position,
                 (
                     SELECT path_thumb
                     FROM product_images
@@ -379,9 +396,23 @@ class SiteCatalog
             LEFT JOIN product_categories pc ON pc.product_id = p.id
             WHERE p.status = 'activo'
               AND (p.category_id IN ($placeholders) OR pc.category_id IN ($placeholders))
-            ORDER BY p.is_featured DESC, p.created_at DESC, p.id DESC
+            GROUP BY p.id
+            ORDER BY category_match_priority ASC,
+                     CASE WHEN category_position IS NULL THEN 1 ELSE 0 END ASC,
+                     category_position ASC,
+                     p.is_featured DESC,
+                     p.created_at DESC,
+                     p.id DESC
         ");
-        $stmt->execute(array_merge($ids, $ids));
+        $stmt->execute(array_merge(
+            [$priorityCategoryId, $priorityCategoryId],
+            $ids,
+            $ids,
+            [$priorityCategoryId],
+            $ids,
+            $ids,
+            $ids
+        ));
 
         return array_map([self::class, 'mapProductForCategory'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }

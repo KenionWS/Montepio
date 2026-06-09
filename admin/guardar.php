@@ -104,6 +104,15 @@ if (!$title) {
 $slug = unique_slug($title, $id);
 
 $now = date('Y-m-d H:i:s');
+$existingCategoryPositions = [];
+
+if ($id) {
+    $positionStmt = $db->prepare("SELECT category_id, position FROM product_categories WHERE product_id = ?");
+    $positionStmt->execute([$id]);
+    foreach ($positionStmt->fetchAll() as $row) {
+        $existingCategoryPositions[(int)$row['category_id']] = (int)$row['position'];
+    }
+}
 
 if ($id) {
     // UPDATE
@@ -143,9 +152,16 @@ if ($id) {
 // ─── Sincronizar categorías (pivot) ──────────────────────────────────────────
 $db->prepare("DELETE FROM product_categories WHERE product_id = ?")->execute([$id]);
 if ($categoryIds) {
-    $ins = $db->prepare("INSERT OR IGNORE INTO product_categories (product_id, category_id) VALUES (?, ?)");
+    $ins = $db->prepare("INSERT OR IGNORE INTO product_categories (product_id, category_id, position) VALUES (?, ?, ?)");
+    $nextPositionStmt = $db->prepare("SELECT COALESCE(MAX(position), -1) + 1 FROM product_categories WHERE category_id = ?");
     foreach ($categoryIds as $cid) {
-        $ins->execute([$id, $cid]);
+        if (array_key_exists($cid, $existingCategoryPositions)) {
+            $position = $existingCategoryPositions[$cid];
+        } else {
+            $nextPositionStmt->execute([$cid]);
+            $position = (int)$nextPositionStmt->fetchColumn();
+        }
+        $ins->execute([$id, $cid, $position]);
     }
 }
 

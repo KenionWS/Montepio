@@ -100,6 +100,7 @@ function db_migrate(PDO $pdo): void
         CREATE TABLE IF NOT EXISTS product_categories (
             product_id  INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
             category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+            position    INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY (product_id, category_id)
         );
 
@@ -163,6 +164,7 @@ function db_migrate(PDO $pdo): void
     db_add_column_if_missing($pdo, 'products', 'shipping_transport', 'INTEGER NOT NULL DEFAULT 0');
     db_add_column_if_missing($pdo, 'products', 'shipping_flete', 'INTEGER NOT NULL DEFAULT 0');
     db_add_column_if_missing($pdo, 'products', 'shipping_encomienda', 'INTEGER NOT NULL DEFAULT 0');
+    db_add_column_if_missing($pdo, 'product_categories', 'position', 'INTEGER NOT NULL DEFAULT 0');
     db_add_column_if_missing($pdo, 'home_service_blocks', 'link_url', 'TEXT');
 
     // Seed categorías por defecto si la tabla está vacía
