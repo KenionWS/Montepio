@@ -30,6 +30,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: transform .2s ease, border-color .2s ease, color .2s ease;
+  border: 0;
 }
 
 .product-back-btn:hover,
@@ -71,7 +72,7 @@
 
 .sequence-title {
   color: inherit;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1.35;
 }
