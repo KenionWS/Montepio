@@ -9,6 +9,8 @@ auth_require();
 
 $db = db();
 
+const PRODUCT_FILTERS_SESSION_KEY = 'admin_product_filters';
+
 function dashboard_category_has_selected_descendant(array $category, array $childrenByParent, int $selectedId): bool
 {
     foreach ($childrenByParent[$category['id']] ?? [] as $child) {
@@ -86,11 +88,44 @@ $stats = $db->query("
 ")->fetch();
 
 // Filtros
-$search     = trim($_GET['q'] ?? '');
-$catId      = (int)($_GET['cat'] ?? 0);
-$status     = $_GET['status'] ?? '';
-$rentalOnly = isset($_GET['rental_only']) ? 1 : 0;
-$page       = max(1, (int)($_GET['page'] ?? 1));
+$allowedStatuses = ['activo', 'reservado', 'vendido'];
+$hasSubmittedFilters = isset($_GET['apply_filters']);
+$resetFilters = isset($_GET['reset_filters']);
+$savedFilters = is_array($_SESSION[PRODUCT_FILTERS_SESSION_KEY] ?? null) ? $_SESSION[PRODUCT_FILTERS_SESSION_KEY] : [];
+
+if ($resetFilters) {
+    unset($_SESSION[PRODUCT_FILTERS_SESSION_KEY]);
+    $savedFilters = [];
+}
+
+$filterSource = $hasSubmittedFilters
+    ? $_GET
+    : $savedFilters;
+
+$search = trim((string)($filterSource['q'] ?? ''));
+$catId = max(0, (int)($filterSource['cat'] ?? 0));
+$status = (string)($filterSource['status'] ?? '');
+if (!in_array($status, $allowedStatuses, true)) {
+    $status = '';
+}
+$rentalOnly = !empty($filterSource['rental_only']) ? 1 : 0;
+$page = max(1, (int)($_GET['page'] ?? 1));
+
+if ($hasSubmittedFilters) {
+    $filtersToPersist = [
+        'q' => $search,
+        'cat' => $catId,
+        'status' => $status,
+        'rental_only' => $rentalOnly,
+    ];
+    $hasActiveFilters = $search !== '' || $catId > 0 || $status !== '' || $rentalOnly === 1;
+    if ($hasActiveFilters) {
+        $_SESSION[PRODUCT_FILTERS_SESSION_KEY] = $filtersToPersist;
+    } else {
+        unset($_SESSION[PRODUCT_FILTERS_SESSION_KEY]);
+    }
+}
+
 $perPage    = 20;
 
 $where  = ['1=1'];
@@ -172,6 +207,7 @@ layout_sidebar('dashboard.php');
 
 <div class="card" style="margin-bottom:20px;overflow: visible;">
   <form method="GET" style="padding:14px 20px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+    <input type="hidden" name="apply_filters" value="1">
     <div style="flex:2;min-width:180px;">
       <label style="margin-bottom:4px;display:block;">Buscar</label>
       <input type="text" name="q" value="<?= h($search) ?>" placeholder="Nombre del producto...">
@@ -214,8 +250,8 @@ layout_sidebar('dashboard.php');
       Solo alquiler
     </label>
     <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
-    <?php if ($search || $catId || $status || $rentalOnly): ?>
-      <a href="dashboard.php" class="btn btn-outline btn-sm">Limpiar</a>
+    <?php if ($search || $catId || $status || $rentalOnly || !empty($savedFilters)): ?>
+      <a href="dashboard.php?reset_filters=1" class="btn btn-outline btn-sm">Limpiar</a>
     <?php endif; ?>
   </form>
 </div>
@@ -332,7 +368,7 @@ layout_sidebar('dashboard.php');
   <?php if ($pages > 1): ?>
   <div class="pager">
     <?php
-    $query = ['q' => $search, 'cat' => $catId ?: null, 'status' => $status ?: null, 'rental_only' => $rentalOnly ? 1 : null];
+    $query = ['apply_filters' => 1, 'q' => $search, 'cat' => $catId ?: null, 'status' => $status ?: null, 'rental_only' => $rentalOnly ? 1 : null];
     $baseQuery = array_filter($query, static function ($value): bool {
         return $value !== null && $value !== '';
     });
