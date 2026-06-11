@@ -11,7 +11,7 @@
 @endphp
 
 @push('styles')
-    <link rel="stylesheet" href="{{ $siteBase }}/assets/site/catalog.css">
+    <link rel="stylesheet" href="{{ \App\Support\SiteCatalog::assetUrl('assets/site/catalog.css', $siteBase) }}">
 @endpush
 
 @section('content')

@@ -65,11 +65,11 @@
 @endphp
 
 @push('styles')
-    <link rel="stylesheet" href="{{ $siteBase }}/assets/site/product.css">
+     <link rel="stylesheet" href="{{ \App\Support\SiteCatalog::assetUrl('assets/site/product.css', $siteBase) }}">
 @endpush
 
 @push('scripts')
-    <script src="{{ $siteBase }}/assets/site/product.js"></script>
+    <script src="{{ \App\Support\SiteCatalog::assetUrl('assets/site/product.js', $siteBase) }}"></script>
 @endpush
 
 @section('content')

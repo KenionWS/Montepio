@@ -1178,6 +1178,20 @@ class SiteCatalog
         return $needle === '' || strncmp($haystack, $needle, strlen($needle)) === 0;
     }
 
+    public static function assetUrl(string $path, ?string $baseUrl = null): string
+    {
+        $normalizedPath = ltrim($path, '/');
+        $baseUrl = rtrim($baseUrl ?? self::baseUrl(), '/');
+        $filePath = base_path(str_replace('/', DIRECTORY_SEPARATOR, $normalizedPath));
+        $url = $baseUrl . '/' . $normalizedPath;
+
+        if (is_file($filePath)) {
+            return $url . '?v=' . (string)filemtime($filePath);
+        }
+
+        return $url;
+    }
+
     private static function db(): PDO
     {
         require_once base_path('admin/lib/config.php');
