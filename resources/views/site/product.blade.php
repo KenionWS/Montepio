@@ -210,7 +210,9 @@
                 <div class="buy-block">
                     <div class="price-row">
                         <span class="price-main">{{ $product['price_label'] }}</span>
-                        <span class="price-note">{{ $product['price_note'] }}</span>
+                        @if (!empty($product['price_note']))
+                            <span class="price-note">{{ $product['price_note'] }}</span>
+                        @endif
                     </div>
                     <p class="price-disclaimer">La pieza puede consultarse tanto para alquiler como para venta, segun disponibilidad.</p>
                     <a href="https://wa.me/{{ $whatsAppNumber }}?text={{ $saleMessage }}" target="_blank" rel="noopener" class="btn-wa-pago">Consultar venta por WhatsApp</a>

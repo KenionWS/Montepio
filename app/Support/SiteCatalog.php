@@ -506,8 +506,7 @@ class SiteCatalog
             'condition' => trim((string)($product['condition_val'] ?? '')),
             'description' => $description,
             'price_label' => $priceLabel,
-            //'price_note' => $priceVisible ? 'Precio final' : ($rentalOnly ? 'Consultar disponibilidad' : 'Precio a consultar'),
-            'price_note' => $priceVisible ? 'Consultar' : ($rentalOnly ? 'Consultar' : 'Consultar'),
+            'price_note' => $priceVisible ? 'Consultar' : ($rentalOnly ? 'Consultar' : ''),
             'availability_label' => $rentalOnly ? 'Solo alquiler' : 'Disponible para alquiler y venta',
             'has_spec_sheet' => trim((string)($product['style'] ?? '')) !== ''
                 || trim((string)($product['era'] ?? '')) !== ''
