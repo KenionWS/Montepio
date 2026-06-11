@@ -20,14 +20,14 @@
         [
             'title' => 'Sillas de roble',
             'before' => 'sillas-roble-antes.jpeg',
-            'after' => 'sillas-roble-despues.jpg',
-            'description' => 'Limpieza profunda, reparacion de madera y acabado natural.',
+            'after' => 'sillas-roble-despues.jpeg',
+            'description' => 'Lavado de madera y retapizado a nuevo.',
         ],
         [
-            'title' => 'Sillon orejero',
+            'title' => 'Sillon',
             'before' => 'sillon-antes.jpeg',
             'after' => 'sillon-despues.jpeg',
-            'description' => 'Tapiceria renovada y recuperacion de estructura.',
+            'description' => 'Tapizado a nuevo, relleno del asiento y encolado.',
         ],
         [
             'title' => 'Comoda con marmol',
