@@ -104,6 +104,13 @@ function db_migrate(PDO $pdo): void
             PRIMARY KEY (product_id, category_id)
         );
 
+        CREATE TABLE IF NOT EXISTS category_display_parents (
+            category_id        INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+            parent_category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+            PRIMARY KEY (category_id, parent_category_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_category_display_parents_parent ON category_display_parents(parent_category_id);
+
         CREATE TABLE IF NOT EXISTS site_settings (
             setting_key   TEXT PRIMARY KEY,
             setting_value TEXT,

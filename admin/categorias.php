@@ -33,6 +33,45 @@ function category_is_descendant_of(PDO $db, int $candidateParentId, int $categor
     return false;
 }
 
+function normalize_display_parent_ids(PDO $db, array $rawIds, ?int $primaryParentId, int $categoryId): array
+{
+    $ids = array_values(array_unique(array_filter(array_map('intval', $rawIds), static function (int $id): bool {
+        return $id > 0;
+    })));
+
+    $normalized = [];
+    foreach ($ids as $id) {
+        if ($id === $categoryId) {
+            continue;
+        }
+        if ($primaryParentId !== null && $id === $primaryParentId) {
+            continue;
+        }
+        if (category_is_descendant_of($db, $id, $categoryId)) {
+            continue;
+        }
+
+        $normalized[] = $id;
+    }
+
+    return $normalized;
+}
+
+function save_category_display_parents(PDO $db, int $categoryId, ?int $primaryParentId, array $rawIds): void
+{
+    $displayParentIds = normalize_display_parent_ids($db, $rawIds, $primaryParentId, $categoryId);
+
+    $db->prepare('DELETE FROM category_display_parents WHERE category_id = ?')->execute([$categoryId]);
+    if (empty($displayParentIds)) {
+        return;
+    }
+
+    $insert = $db->prepare('INSERT OR IGNORE INTO category_display_parents (category_id, parent_category_id) VALUES (?, ?)');
+    foreach ($displayParentIds as $displayParentId) {
+        $insert->execute([$categoryId, $displayParentId]);
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
     $action = $_POST['action'] ?? '';
@@ -42,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $parentId = (int)($_POST['parent_id'] ?? 0) ?: null;
+        $displayParentIds = (array)($_POST['display_parent_ids'] ?? []);
 
         if ($name === '') {
             flash_set('err', 'El nombre es obligatorio.');
@@ -54,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $db->prepare('INSERT INTO categories (name, slug, description, show_in_menu, parent_id, position) VALUES (?, ?, ?, ?, ?, ?)');
                 $stmt->execute([$name, $slug, $description !== '' ? $description : null, 0, $parentId, $pos]);
                 $categoryId = (int)$db->lastInsertId();
+                save_category_display_parents($db, $categoryId, $parentId, $displayParentIds);
                 flash_set('ok', 'Categoria creada.');
             } else {
                 if ($parentId === $editId || ($parentId !== null && category_is_descendant_of($db, $parentId, $editId))) {
@@ -62,6 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $stmt = $db->prepare('UPDATE categories SET name = ?, slug = ?, description = ?, parent_id = ? WHERE id = ?');
                 $stmt->execute([$name, $slug, $description !== '' ? $description : null, $parentId, $editId]);
+                save_category_display_parents($db, $editId, $parentId, $displayParentIds);
                 flash_set('ok', 'Categoria actualizada.');
             }
 
@@ -164,6 +206,40 @@ function render_category_parent_options(array $categories, array $childrenByPare
     }
 }
 
+function render_category_display_parent_checkboxes(array $categories, array $childrenByParent, ?array $editCat, array $selectedIds, int $level = 0): void
+{
+    foreach ($categories as $category) {
+        if ($editCat && ((int)$category['id'] === (int)$editCat['id'] || category_contains_id($category, $childrenByParent, (int)$editCat['id']))) {
+            continue;
+        }
+
+        $categoryId = (int)$category['id'];
+        $isChecked = in_array($categoryId, $selectedIds, true);
+        $isCanonicalParent = $editCat && (int)($editCat['parent_id'] ?? 0) === $categoryId;
+        ?>
+        <label
+          class="display-parent-option<?= $isCanonicalParent ? ' is-disabled' : '' ?>"
+          data-display-parent-option
+          data-category-id="<?= $categoryId ?>"
+          data-label="<?= h(mb_strtolower(str_repeat('-- ', $level) . $category['name'])) ?>"
+        >
+          <input
+            type="checkbox"
+            name="display_parent_ids[]"
+            value="<?= $categoryId ?>"
+            <?= $isChecked ? 'checked' : '' ?>
+            <?= $isCanonicalParent ? 'disabled' : '' ?>
+          >
+          <span class="display-parent-option-copy">
+            <span class="display-parent-option-name"><?= h(str_repeat('-- ', $level) . $category['name']) ?></span>
+            <span class="display-parent-option-meta"><?= $level === 0 ? 'Principal' : 'Nivel ' . ($level + 1) ?></span>
+          </span>
+        </label>
+        <?php
+        render_category_display_parent_checkboxes($childrenByParent[$category['id']] ?? [], $childrenByParent, $editCat, $selectedIds, $level + 1);
+    }
+}
+
 function category_search_text(array $category, array $childrenByParent): string
 {
     $text = $category['name'] . ' ' . $category['slug'];
@@ -236,10 +312,17 @@ function render_category_admin_node(array $category, array $childrenByParent, ?a
 
 $editId = (int)($_GET['edit'] ?? 0);
 $editCat = null;
+$editDisplayParentIds = [];
 if ($editId > 0) {
     $stmt = $db->prepare('SELECT * FROM categories WHERE id = ?');
     $stmt->execute([$editId]);
     $editCat = $stmt->fetch();
+
+    if ($editCat) {
+        $displayParentStmt = $db->prepare('SELECT parent_category_id FROM category_display_parents WHERE category_id = ?');
+        $displayParentStmt->execute([$editId]);
+        $editDisplayParentIds = array_map('intval', array_column($displayParentStmt->fetchAll(), 'parent_category_id'));
+    }
 }
 
 layout_head('Categorias', '<style>
@@ -298,6 +381,20 @@ layout_head('Categorias', '<style>
 .parent-combo-empty { display:none; padding:10px; color:var(--gray-m); font-size:12px; }
 .parent-combo-empty.is-visible { display:block; }
 .parent-select-native { display:none; }
+.display-parent-picker { border:1px solid #e3dbcf; border-radius:12px; background:#faf8f4; padding:10px; }
+.display-parent-search { margin-bottom:10px; }
+.display-parent-search input { width:100%; padding:10px 12px; border:1px solid #d8d2c9; border-radius:8px; background:#fff; font-size:13px; }
+.display-parent-list { max-height:220px; overflow:auto; display:grid; gap:6px; }
+.display-parent-option { display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:10px; background:#fff; border:1px solid #ece7dd; cursor:pointer; }
+.display-parent-option:hover { border-color:#d8d2c9; }
+.display-parent-option input { margin-top:2px; width:auto; accent-color:var(--green); }
+.display-parent-option-copy { display:grid; gap:2px; min-width:0; }
+.display-parent-option-name { font-size:13px; color:var(--text); }
+.display-parent-option-meta { font-size:11px; color:var(--gray-m); text-transform:uppercase; letter-spacing:.08em; }
+.display-parent-option.is-disabled { opacity:.55; cursor:not-allowed; }
+.display-parent-option.is-hidden { display:none; }
+.display-parent-empty { display:none; padding:8px 4px 2px; color:var(--gray-m); font-size:12px; }
+.display-parent-empty.is-visible { display:block; }
 </style>');
 
 layout_sidebar('categorias.php');
@@ -380,6 +477,20 @@ layout_sidebar('categorias.php');
               <?php render_category_parent_options($parents, $children, $editCat); ?>
             </select>
             <span class="form-hint">Podes elegir cualquier categoria como padre para armar varios niveles. Si lo dejas vacio, se crea como categoria principal.</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom:20px;">
+            <label>Mostrar tambien dentro de</label>
+            <div class="display-parent-picker">
+              <div class="display-parent-search">
+                <input type="search" id="displayParentSearch" placeholder="Buscar categorias extra...">
+              </div>
+              <div class="display-parent-list" id="displayParentList">
+                <?php render_category_display_parent_checkboxes($parents, $children, $editCat, $editDisplayParentIds); ?>
+              </div>
+              <div class="display-parent-empty" id="displayParentEmpty">No encontramos categorias para mostrar.</div>
+            </div>
+            <span class="form-hint">La categoria mantiene un padre principal, pero tambien puede aparecer listada debajo de otras categorias en el front.</span>
           </div>
 
           <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
@@ -478,6 +589,7 @@ document.addEventListener('DOMContentLoaded', function () {
     parentSelect.value = option.value;
     parentSearch.value = option.label;
     combo.classList.remove('is-open');
+    syncDisplayParentOptions();
   };
 
   const renderParentOptions = () => {
@@ -528,6 +640,45 @@ document.addEventListener('DOMContentLoaded', function () {
     const current = parentOptions.find((option) => option.value === parentSelect?.value) || parentOptions[0];
     if (current && parentSearch) parentSearch.value = current.label;
   });
+
+  const displayParentSearch = document.getElementById('displayParentSearch');
+  const displayParentOptions = Array.from(document.querySelectorAll('[data-display-parent-option]'));
+  const displayParentEmpty = document.getElementById('displayParentEmpty');
+  const syncDisplayParentOptions = () => {
+    const selectedParentId = parentSelect?.value || '';
+    displayParentOptions.forEach((option) => {
+      const checkbox = option.querySelector('input[type="checkbox"]');
+      const isCanonicalParent = selectedParentId !== '' && option.dataset.categoryId === selectedParentId;
+      option.classList.toggle('is-disabled', isCanonicalParent);
+      if (checkbox) {
+        checkbox.disabled = isCanonicalParent;
+        if (isCanonicalParent) {
+          checkbox.checked = false;
+        }
+      }
+    });
+  };
+
+  const applyDisplayParentFilter = () => {
+    const query = (displayParentSearch?.value || '').trim().toLowerCase();
+    let visible = 0;
+
+    displayParentOptions.forEach((option) => {
+      const label = option.dataset.label || '';
+      const match = query === '' || label.includes(query);
+      option.classList.toggle('is-hidden', !match);
+      if (match) visible += 1;
+    });
+
+    if (displayParentEmpty) {
+      displayParentEmpty.classList.toggle('is-visible', visible === 0);
+    }
+  };
+
+  parentSelect?.addEventListener('change', syncDisplayParentOptions);
+  displayParentSearch?.addEventListener('input', applyDisplayParentFilter);
+  syncDisplayParentOptions();
+  applyDisplayParentFilter();
 });
 </script>
 <?php layout_foot(); ?>

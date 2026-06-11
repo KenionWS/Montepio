@@ -579,30 +579,67 @@ class SiteCatalog
             ORDER BY LOWER(c.name), c.name
         ")->fetchAll(PDO::FETCH_ASSOC);
 
-        return self::buildCategoryTree($rows);
+        return self::buildCategoryTree($rows, self::fetchCategoryDisplayParentsMap($db));
     }
 
-    private static function buildCategoryTree(array $rows): array
+    private static function fetchCategoryDisplayParentsMap(PDO $db): array
+    {
+        $rows = $db->query("
+            SELECT category_id, parent_category_id
+            FROM category_display_parents
+            ORDER BY parent_category_id, category_id
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        $map = [];
+        foreach ($rows as $row) {
+            $parentId = (int)($row['parent_category_id'] ?? 0);
+            $categoryId = (int)($row['category_id'] ?? 0);
+            if ($parentId <= 0 || $categoryId <= 0) {
+                continue;
+            }
+
+            $map[$parentId][] = $categoryId;
+        }
+
+        return $map;
+    }
+
+    private static function buildCategoryTree(array $rows, array $displayChildrenByParent = []): array
     {
         $nodes = [];
-        $childrenByParent = [];
+        $canonicalChildrenByParent = [];
 
         foreach ($rows as $row) {
             $nodes[(int)$row['id']] = $row;
-            $childrenByParent[(int)($row['parent_id'] ?? 0)][] = (int)$row['id'];
+            $canonicalChildrenByParent[(int)($row['parent_id'] ?? 0)][] = (int)$row['id'];
         }
 
-        $build = function (int $id, array $pathSlugs = [], int $depth = 0) use (&$build, &$nodes, &$childrenByParent): array {
+        $build = function (int $id, array $pathSlugs = [], int $depth = 0, array $branchIds = []) use (&$build, &$nodes, &$canonicalChildrenByParent, &$displayChildrenByParent): ?array {
+            if (!isset($nodes[$id]) || isset($branchIds[$id])) {
+                return null;
+            }
+
             $row = $nodes[$id];
             $pathSlugs[] = (string)$row['slug'];
             $row['path_slugs'] = $pathSlugs;
             $row['depth'] = $depth;
+            $branchIds[$id] = true;
 
             $mapped = self::mapCategory($row);
             $mapped['children'] = [];
 
-            foreach ($childrenByParent[$id] ?? [] as $childId) {
-                $mapped['children'][] = $build($childId, $pathSlugs, $depth + 1);
+            $childIds = $canonicalChildrenByParent[$id] ?? [];
+            foreach ($displayChildrenByParent[$id] ?? [] as $displayChildId) {
+                if (!in_array($displayChildId, $childIds, true)) {
+                    $childIds[] = $displayChildId;
+                }
+            }
+
+            foreach ($childIds as $childId) {
+                $child = $build($childId, $pathSlugs, $depth + 1, $branchIds);
+                if ($child !== null) {
+                    $mapped['children'][] = $child;
+                }
             }
 
             $mapped['product_count'] += array_sum(array_column($mapped['children'], 'product_count'));
@@ -611,8 +648,11 @@ class SiteCatalog
         };
 
         $tree = [];
-        foreach ($childrenByParent[0] ?? [] as $rootId) {
-            $tree[] = $build($rootId);
+        foreach ($canonicalChildrenByParent[0] ?? [] as $rootId) {
+            $root = $build($rootId);
+            if ($root !== null) {
+                $tree[] = $root;
+            }
         }
 
         return $tree;
@@ -649,9 +689,28 @@ class SiteCatalog
     private static function flattenCategories(array $categories): array
     {
         $flat = [];
+        $seen = [];
         foreach ($categories as $category) {
+            $categoryId = (int)($category['id'] ?? 0);
+            if ($categoryId > 0 && isset($seen[$categoryId])) {
+                continue;
+            }
+
+            if ($categoryId > 0) {
+                $seen[$categoryId] = true;
+            }
+
             $flat[] = $category;
-            $flat = array_merge($flat, self::flattenCategories($category['children'] ?? []));
+            foreach (self::flattenCategories($category['children'] ?? []) as $child) {
+                $childId = (int)($child['id'] ?? 0);
+                if ($childId > 0 && isset($seen[$childId])) {
+                    continue;
+                }
+                if ($childId > 0) {
+                    $seen[$childId] = true;
+                }
+                $flat[] = $child;
+            }
         }
 
         return $flat;
