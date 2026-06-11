@@ -249,6 +249,21 @@ class SiteCatalog
         $primaryCategory = !empty($categoryPath) ? $categoryPath[count($categoryPath) - 1] : null;
         $parentCategory = count($categoryPath) > 1 ? $categoryPath[0] : null;
         $relatedIds = array_column($categoryPath, 'id');
+        $previousProduct = null;
+        $nextProduct = null;
+
+        if (!empty($primaryCategory['id'])) {
+            $categoryProducts = self::fetchProductsForCategoryIds([(int)$primaryCategory['id']], (int)$primaryCategory['id']);
+            foreach ($categoryProducts as $index => $categoryProduct) {
+                if (($categoryProduct['slug'] ?? null) !== $slug) {
+                    continue;
+                }
+
+                $previousProduct = $categoryProducts[$index - 1] ?? null;
+                $nextProduct = $categoryProducts[$index + 1] ?? null;
+                break;
+            }
+        }
 
         $relatedProducts = array_values(array_filter(
             self::fetchProductsForCategoryIds($relatedIds, !empty($primaryCategory['id']) ? (int)$primaryCategory['id'] : null),
@@ -265,6 +280,8 @@ class SiteCatalog
             'navCategories' => self::fetchCategoryTree(),
             'sitePopup' => self::fetchSitePopup(),
             'product' => self::mapProductDetail($product, $images, $primaryCategory, $parentCategory, $categoryPath),
+            'previousProduct' => $previousProduct,
+            'nextProduct' => $nextProduct,
             'relatedProducts' => $relatedProducts,
         ];
     }

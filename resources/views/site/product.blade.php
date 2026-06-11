@@ -19,6 +19,10 @@
     $activeNavChildSlug = $parentCategory ? ($primaryCategory['slug'] ?? null) : null;
     $footerBackUrl = $topBadgeUrl;
     $footerBackLabel = 'Volver a la categoria';
+    $previousProductUrl = $previousProduct['url'] ?? null;
+    $previousProductTitle = $previousProduct['title'] ?? null;
+    $nextProductUrl = $nextProduct['url'] ?? null;
+    $nextProductTitle = $nextProduct['title'] ?? null;
     $whatsAppNumber = '5491165714568';
     $productUrl = url('/producto/' . rawurlencode((string) $product['slug']));
     $productLinkLine = "\n" . $productUrl;
@@ -81,6 +85,37 @@
             @endforeach
 
             <span class="current">{{ $product['title'] }}</span>
+        </div>
+    </div>
+
+    <div class="product-nav-shell">
+        <div class="product-nav-bar">
+            <button
+                type="button"
+                class="product-back-btn"
+                onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href = {{ Js::from($footerBackUrl) }}; }"
+            >
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                Volver
+            </button>
+
+            @if ($previousProductUrl || $nextProductUrl)
+                <div class="product-sequence-nav">
+                    @if ($previousProductUrl)
+                        <a href="{{ $previousProductUrl }}" class="sequence-btn prev" aria-label="Producto anterior: {{ $previousProductTitle }}">
+                            <span class="sequence-direction">Anterior</span>
+                            <span class="sequence-title">{{ $previousProductTitle }}</span>
+                        </a>
+                    @endif
+
+                    @if ($nextProductUrl)
+                        <a href="{{ $nextProductUrl }}" class="sequence-btn next" aria-label="Producto siguiente: {{ $nextProductTitle }}">
+                            <span class="sequence-direction">Siguiente</span>
+                            <span class="sequence-title">{{ $nextProductTitle }}</span>
+                        </a>
+                    @endif
+                </div>
+            @endif
         </div>
     </div>
 
