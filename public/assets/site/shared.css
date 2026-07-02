@@ -634,7 +634,8 @@ img {
 
 .site-popup-media {
   min-height: 360px;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
 }
 

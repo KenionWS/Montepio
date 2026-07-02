@@ -273,7 +273,7 @@ layout_sidebar('popup.php');
 .checkbox-line input{width:auto}
 .popup-preview{position:relative;min-height:360px;border-radius:18px;overflow:hidden;background:var(--white);border:1px solid #ece7dd;display:grid;grid-template-columns:1fr}
 .popup-preview.has-image{grid-template-columns:minmax(160px,.9fr) 1fr}
-.popup-preview-media{min-height:360px;background-size:cover;background-position:center}
+.popup-preview-media{min-height:360px;background-size:contain;background-repeat:no-repeat;background-position: center;}
 .popup-preview-content{position:relative;z-index:1;padding:32px 28px;color:var(--green-dark);display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
 .popup-preview-kicker{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
 .popup-preview h3{font-family:'Playfair Display',serif;font-size:34px;line-height:1.05;margin:8px 0 10px}
